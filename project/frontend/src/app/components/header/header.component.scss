@@ -1,0 +1,9 @@
+.app-header {
+  background: var(--p-primary-50);
+}
+
+@media screen and (max-width: 720px) {
+  :host ::ng-deep .p-button-label {
+    display: none;
+  }
+}

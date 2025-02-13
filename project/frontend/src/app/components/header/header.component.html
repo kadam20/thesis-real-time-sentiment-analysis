@@ -1,18 +1,33 @@
-<div class="flex flex-col bg-primary">
-  <div class="">Live Eleciton Sentiment Tracker</div>
-  <div>
-    <div>
-        Election Map
-    </div>
-    <div>
-        Dashboard
-    </div>
-    <div>
-        Comparison
-    </div>
-    <div>
-    <p-button label="Toggle Dark Mode" (onClick)="toggleDarkMode()" />
-
+<div class="flex flex-row justify-between px-8 py-3 items-center app-header">
+  <div class="text-primary text-l font-bold">
+    Live Eleciton Sentiment Tracker
+  </div>
+  <div class="flex flex-row gap-5">
+    <p-button
+      label="Election Map"
+      [variant]="currentTab() !== routeEnums.ELECTION_MAP ? 'text' : undefined"
+      icon="pi pi-map"
+      (click)="navigateTab(routeEnums.ELECTION_MAP)"
+    />
+    <p-button
+      label="Time Tracker"
+      [variant]="currentTab() !== routeEnums.TIME_TRACKER ? 'text' : undefined"
+      icon="pi pi-calendar"
+      (click)="navigateTab(routeEnums.TIME_TRACKER)"
+    />
+    <p-button
+      label="Comparison"
+      [variant]="currentTab() !== routeEnums.COMPARISON ? 'text' : undefined"
+      icon="pi pi-th-large"
+      (click)="navigateTab(routeEnums.COMPARISON)"
+    />
+    <div class="flex items-center gap-10">
+      <p-button
+        [icon]="isDarkMode() ? 'pi pi-moon' : 'pi pi-sun'"
+        [rounded]="true"
+        [text]="true"
+        (click)="toggleDarkMode()"
+      />
     </div>
   </div>
 </div>

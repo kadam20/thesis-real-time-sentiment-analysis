@@ -1,15 +1,18 @@
-import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
-
 import { routes } from './app.routes';
+import { CustomPreset } from '../styles';
 
 const config: SocketIoConfig = { url: 'http://localhost:8988', options: {} };
-
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,7 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-        preset: Aura,
+        preset: CustomPreset,
         options: {
           cssLayer: {
             name: 'primeng',
@@ -28,6 +31,6 @@ export const appConfig: ApplicationConfig = {
         },
       },
     }),
-    importProvidersFrom(SocketIoModule.forRoot(config))
+    importProvidersFrom(SocketIoModule.forRoot(config)),
   ],
 };
