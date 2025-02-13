@@ -1,0 +1,10 @@
+@layer tailwind-base, primeng, tailwind;
+
+@layer tailwind-base {
+    @tailwind base;
+}
+
+@layer tailwind {
+    @tailwind components;
+    @tailwind utilities;
+}
