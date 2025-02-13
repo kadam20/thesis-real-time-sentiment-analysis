@@ -1,0 +1,11 @@
+<div class="app-side-panel h-full rounded-xl p-7 card flex flex-col gap-7">
+    <div class="flex justify-between">
+        <span class="font-bold">Live Feed</span>
+        <span>{{ currentTime | date: 'HH:mm:ss' }}</span>
+    </div>
+    <div class="flex flex-col gap-7">
+        @for(tweet of [1,2,3]; track tweet){
+            <app-tweet></app-tweet>
+        }
+    </div>
+</div>

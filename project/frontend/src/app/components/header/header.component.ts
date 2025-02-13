@@ -3,6 +3,7 @@ import { ButtonModule } from 'primeng/button';
 import { LayoutService } from '../../services/layout.service';
 import { LocalstorageService } from '../../services/localstorage.service';
 import { RouteEnums } from '../../enums/route.enum';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -18,6 +19,8 @@ export class HeaderComponent implements OnInit {
   isDarkMode = this.layoutService.isDarkMode;
   routeEnums = RouteEnums;
   currentTab = signal<string>(this.routeEnums.ELECTION_MAP);
+
+  constructor(private router: Router){}
 
   ngOnInit(): void {
     // Get the current tab from local storage and set it to the current tab.
@@ -40,6 +43,7 @@ export class HeaderComponent implements OnInit {
    */
   navigateTab(tabName: string) {
     this.currentTab.set(tabName);
+    this.router.navigate([`/${tabName}`])
     this.localStorageService.setItem('currentTab', tabName);
   }
 }

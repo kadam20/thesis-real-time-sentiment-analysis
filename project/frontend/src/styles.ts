@@ -37,7 +37,7 @@ export const CustomPreset = definePreset(Aura, {
           400: '{zinc.100}',
           500: '{zinc.100}',
           600: '{zinc.600}',
-          700: '{zinc.700}',
+          700: '{zinc.200}',
           800: '{zinc.800}',
           900: '{zinc.900}',
           950: '{zinc.950}',
