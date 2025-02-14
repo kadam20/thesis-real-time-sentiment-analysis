@@ -1,10 +1,10 @@
 :host ::ng-deep   {
     .biden {
-        background: blue !important;
+        background: var(--p-primary-blue);
         color: white;
     }
     .trump {
-        background: red !important;
+        background: var(--p-primary-red);
         color: white;
     }
 }
