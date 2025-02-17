@@ -1,3 +1,16 @@
-<div class="col-span-3 card rounded-xl p-7 h-full">
-    hello ele
+<div
+  class="col-span-3 card rounded-xl p-7 h-full flex flex-col items-center justify-center"
+>
+  <div class="flex items-center justify-between pb-5" style="width: 95%">
+    <span class="text-xl font-bold">Election Map</span>
+    <p-selectbutton
+      [options]="stateOptions"
+      [(ngModel)]="mapStyle"
+      optionLabel="label"
+      (ngModelChange)="swapView($event)"
+      optionValue="value"
+      aria-labelledby="basic"
+    />
+  </div>
+  <div id="map" style="height: 90%; width: 95%; border-radius: 8px"></div>
 </div>

@@ -15,7 +15,6 @@ export class SidePanelComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.intervalId = setInterval(() => {
-      console.log('hello')
       this.currentTime = new Date();
     }, 1000);
   }

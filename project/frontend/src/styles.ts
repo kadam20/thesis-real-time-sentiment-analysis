@@ -18,7 +18,9 @@ export const CustomPreset = definePreset(Aura, {
           900: '{zinc.900}',
           950: '{zinc.950}',
           red: '{red.500}',
-          blue: '{blue.500}'
+          blue: '{blue.500}',
+          orange: '{orange.500}',
+          green: '{green.500}'
         },
         highlight: {
           background: 'rgba(0, 0, 0, 0.99)',
@@ -44,7 +46,9 @@ export const CustomPreset = definePreset(Aura, {
           900: '{zinc.900}',
           950: '{zinc.950}',
           red: '{red.500}',
-          blue: '{blue.500}'
+          blue: '{blue.500}',
+          orange: '{orange.500}',
+          green: '{green.500}'
         },
         highlight: {
           background: 'rgba(0, 0, 0, 0.99)',
