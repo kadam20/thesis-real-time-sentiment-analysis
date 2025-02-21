@@ -1,17 +1,22 @@
 import { Injectable } from '@angular/core';
 import io from 'socket.io-client';
 import { environment } from '../../environments/environment.development';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SocketService {
   socket = io(environment.socketUrl);
-  constructor() {
+  private tweetsSubject = new BehaviorSubject<any[]>([]);
+  tweets$ = this.tweetsSubject.asObservable();
+
+  connect(){
     try {
       console.log('Connecting to server');
-      this.socket.on('new_data', (data) => {
-        console.log(data);
+      this.socket.on('new_data', (tweet) => {
+        console.log(tweet);
+        this.tweetsSubject.next([...this.tweetsSubject.getValue(), tweet]);
       });
       this.socket.on('connect', () => {
         console.log('Connected to server');
@@ -22,6 +27,5 @@ export class SocketService {
     } catch (error) {
       console.error('Error:', error);
     }
-
   }
 }

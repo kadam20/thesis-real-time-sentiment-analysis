@@ -25,6 +25,7 @@ async def seed():
                     city VARCHAR(255),
                     country VARCHAR(255),
                     continent VARCHAR(255),
+                    candidate VARCHAR(255),
                     state VARCHAR(255),
                     state_code VARCHAR(10),
                     sentiment_label VARCHAR(50),
@@ -43,8 +44,15 @@ async def seed():
                         json_build_object(
                             'id', NEW.id,
                             'tweet', NEW.tweet,
-                            'sentiment_label', NEW.sentiment_label,
-                            'sentiment_score', NEW.sentiment_score
+                            'likes', NEW.likes,
+                            'retweetCount', NEW.retweet_count,
+                            'userName', NEW.user_name,
+                            'userFollower', NEW.user_followers_count,
+                            'state', NEW.state,
+                            'state_code', NEW.state_code,
+                            'candidate', NEW.candidate,
+                            'sentimentLabel', NEW.sentiment_label,
+                            'sentimentScore', NEW.sentiment_score
                         )::text
                     );
                     RETURN NEW;

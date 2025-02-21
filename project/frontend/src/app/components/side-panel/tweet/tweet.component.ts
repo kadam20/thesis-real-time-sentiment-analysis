@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { TagModule } from 'primeng/tag';
 
 @Component({
@@ -9,5 +9,5 @@ import { TagModule } from 'primeng/tag';
   styleUrl: './tweet.component.scss'
 })
 export class TweetComponent {
-
+  tweet = input.required<any>()
 }
