@@ -1,4 +1,8 @@
 <div class="col-span-3 card rounded-xl p-7 h-full">
-    hello time
-    <p-chart type="line" [data]="data" [options]="options" class="h-[30rem]" />
+    <div class="flex items-center justify-between pb-5" style="width: 95%">
+        <span class="text-xl font-bold">Election sentiment over time</span>
+    </div>
+    <div class="flex items-center w-full h-full pt-20">
+        <p-chart type="line" [data]="data" [options]="options" class="h-full w-full" />
+    </div>
 </div>
