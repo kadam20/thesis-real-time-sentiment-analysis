@@ -1,8 +1,66 @@
-<div class="col-span-3 card rounded-xl p-7 h-full">
-    <div class="flex items-center justify-between pb-5" style="width: 95%">
-        <span class="text-xl font-bold">Election sentiment over time</span>
+<div class="h-full flex flex-col gap-3">
+  <div class="grid grid-cols-3 gap-3">
+    <div class="card rounded-xl h-[15vh]">
+      <div class="flex flex-row justify-between">
+        <div class="flex flex-col p-7 gap-2">
+          <span class="text-2xl font-bold">Trump Sentiment</span>
+          <div>
+            <span class="text-5xl font-bold">0.3</span>
+            <i
+              class="pi pi-angle-double-up text-5xl ml-2"
+              style="color: var(--p-primary-green)"
+            ></i>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center w-full h-full pt-20">
-        <p-chart type="line" [data]="data" [options]="options" class="h-full w-full" />
+    <div class="card rounded-xl h-[15vh]">
+      <div class="flex flex-row justify-between">
+        <div class="flex flex-col p-7 gap-2">
+          <span class="text-2xl font-bold">Biden Sentiment</span>
+          <div>
+            <span class="text-5xl font-bold">0.3</span>
+            <i
+              class="pi pi-angle-double-down text-5xl ml-2 red"
+              style="color: var(--p-primary-orange)"
+            ></i>
+          </div>
+        </div>
+      </div>
     </div>
+    <div class="card rounded-xl h-[15vh]">
+        <div class="flex flex-row justify-between">
+          <div class="flex flex-col p-7 gap-2">
+            <span class="text-2xl font-bold">Overall Sentiment</span>
+            <div>
+              <span class="text-5xl font-bold">0.1</span>
+              <i
+                class="pi pi-angle-double-down text-5xl ml-2 red"
+                style="color: var(--p-primary-orange)"
+              ></i>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+  <div class="card rounded-xl p-7 h-full">
+    <p-chart
+      type="line"
+      [data]="data"
+      [options]="options"
+      class="h-full w-full"
+    />
+  </div>
 </div>
+
+<!-- <div class="flex items-center justify-between pb-5" style="width: 95%">
+      <span class="text-xl font-bold">Election sentiment over time</span>
+    </div>
+    <div class="flex items-center w-full pt-20">
+      <p-chart
+        type="line"
+        [data]="data"
+        [options]="options"
+        class="h-full w-full"
+      />
+    </div> -->

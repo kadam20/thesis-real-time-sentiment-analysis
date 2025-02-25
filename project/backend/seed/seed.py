@@ -49,7 +49,7 @@ async def seed():
                             'userName', NEW.user_name,
                             'userFollower', NEW.user_followers_count,
                             'state', NEW.state,
-                            'state_code', NEW.state_code,
+                            'stateCode', NEW.state_code,
                             'candidate', NEW.candidate,
                             'sentimentLabel', NEW.sentiment_label,
                             'sentimentScore', NEW.sentiment_score
