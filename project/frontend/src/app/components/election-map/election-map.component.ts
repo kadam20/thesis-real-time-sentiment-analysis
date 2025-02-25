@@ -1,10 +1,22 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+  ApplicationRef,
+  Component,
+  ComponentRef,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  createComponent,
+  inject,
+  signal,
+} from '@angular/core';
 import * as L from 'leaflet';
 import { statesData } from './states-data';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LocalstorageService } from '../../services/localstorage.service';
 import { State } from '../../models/state.model';
+import { TooltipOptions } from 'leaflet';
+import { MapTooltipComponent } from './map-tooltip/map-tooltip.component';
 
 @Component({
   selector: 'app-election-map',
@@ -16,7 +28,7 @@ import { State } from '../../models/state.model';
     './election-map.component.scss',
   ],
 })
-export class ElectionMapComponent implements OnInit {
+export class ElectionMapComponent implements OnInit, OnChanges {
   localStorageService = inject(LocalstorageService);
   map: L.Map;
   geojson: any;
@@ -26,11 +38,48 @@ export class ElectionMapComponent implements OnInit {
     { label: 'Sentiment', value: 'sentiment' },
   ];
   mapStyle = signal<string>('candidate');
+  private _componentRef: ComponentRef<MapTooltipComponent>;
+  private _applicationRef = inject(ApplicationRef);
 
   ngOnInit(): void {
     this.getMapStyle();
     this.mapData();
     this.mapInit();
+    this.buildTooltip()    
+  }
+
+  buildTooltip(){
+    this.map.on('tooltipopen', (event) => {
+      const { tooltip } = event;
+      const tooltipContainer = (tooltip as any)._container;
+      const tooltipData = (tooltip.options as TooltipOptions & { data: any })
+        ?.data.state.properties;
+      this._componentRef = createComponent(MapTooltipComponent, {
+        environmentInjector: this._applicationRef.injector,
+        hostElement: tooltipContainer,
+      });
+
+      this._componentRef.setInput('tooltipData', tooltipData);
+
+      this._applicationRef.attachView(this._componentRef.hostView);
+    });
+
+    this.map.on('tooltipclose', () => {
+      this._componentRef?.destroy();
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    this.buildTooltip()    
+  }
+
+  // Helper function to bind a tooltip to a polygon
+  bindTooltipToPolygon(polygon: L.Polygon, state: any) {
+    polygon.bindTooltip('', {
+      className: 'state-tooltip',
+      opacity: 1,
+      data: { state: state },
+    } as TooltipOptions);
   }
 
   /**
@@ -46,9 +95,11 @@ export class ElectionMapComponent implements OnInit {
    */
   mapData() {
     this.statesData.forEach((state: State) => {
-      state.properties.sentiment = Math.random() * 2 - 1;
-      state.properties.trumpSentiment = Math.random() * 2 - 1;
-      state.properties.bidenSentiment = Math.random() * 2 - 1;
+      state.properties.sentiment = Number((Math.random() * 2 - 1).toFixed(1));
+      state.properties.trumpSentiment = Number((Math.random() * 2 - 1).toFixed(1));
+      state.properties.bidenSentiment = Number((Math.random() * 2 - 1).toFixed(1));
+      state.properties.trumpAmount = Number((Math.random() * 100000- 1).toFixed(0));
+      state.properties.bidenAmount = Number((Math.random() * 100000 - 1).toFixed(0));
       state.properties.tooltipContent = this.generateTooltip(state);
     });
   }
@@ -59,7 +110,7 @@ export class ElectionMapComponent implements OnInit {
   mapInit() {
     // Initializing map and setting default view
     this.map = L.map('map').setView([38.879966, -101.726909], 4);
-    // Adding map 
+    // Adding map
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -136,8 +187,7 @@ export class ElectionMapComponent implements OnInit {
         <span>Trump sentiment: ${state.properties.trumpSentiment}</span><br>
         <span class="tooltip-blue">.</span>
         <span>Biden sentiment: ${state.properties.bidenSentiment}</span>
-    </div>
-`;
+    </div>`;
   }
 
   /**
@@ -148,11 +198,12 @@ export class ElectionMapComponent implements OnInit {
   onEachFeature(state: any, layer: L.Layer) {
     // Adding tooltip to the states
     if (state.properties && state.properties.name) {
-      layer.bindTooltip(state.properties.tooltipContent, {
+      layer.bindTooltip('', {
         permanent: false,
         direction: 'bottom',
-        className: 'custom-tooltip',
-      });
+        className: 'state-tooltip',
+        data: { state: state },
+      } as any);
     }
 
     // Adding hover effect to the states on mouseover

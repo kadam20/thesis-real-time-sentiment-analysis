@@ -10,6 +10,8 @@ class StateProperty {
   sentiment?: number;
   trumpSentiment?: number;
   bidenSentiment?: number;
+  trumpAmount?: number;
+  bidenAmount?: number;
   tooltipContent?: string;
   density: number;
 }

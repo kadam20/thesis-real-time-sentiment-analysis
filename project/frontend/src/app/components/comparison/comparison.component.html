@@ -1,46 +1,46 @@
 <div class="h-full flex flex-col gap-3">
-    <div class="grid grid-cols-3 gap-3">
-        <div class="card rounded-xl h-[15vh]">
-          <div class="flex flex-row justify-between">
-            <div class="flex flex-col p-7 gap-2">
-              <span class="text-2xl font-bold">Total Tweets</span>
-              <span class="text-5xl font-bold">12 345</span>
-            </div>
-            <div class="max-h-[100px] max-w-[100px] p-4 mt-2 mr-2">
-              <p-chart type="pie" [data]="tweet" />
-            </div>
-          </div>
+  <div class="grid grid-cols-3 gap-3">
+    <div class="card rounded-xl h-[15vh]">
+      <div class="flex flex-row justify-between">
+        <div class="flex flex-col p-7 gap-2">
+          <span class="text-2xl font-bold">Total Tweets</span>
+          <span class="text-5xl font-bold">12 345</span>
         </div>
-        <div class="card rounded-xl h-[15vh]">
-          <div class="flex flex-row justify-between">
-            <div class="flex flex-col p-7 gap-2">
-              <span class="text-2xl font-bold">Avg Sentiment</span>
-              <span class="text-5xl font-bold">0.4</span>
-            </div>
-            <div class="max-h-[100px] max-w-[100px] p-4 mt-2 mr-2">
-              <p-chart type="pie" [data]="sentiment" />
-            </div>
-          </div>
+        <div class="max-h-[100px] max-w-[100px] p-4 mt-2 mr-2">
+          <p-chart type="pie" [data]="tweet" />
         </div>
-        <div class="card rounded-xl h-[15vh] p-7">
-          <div class="flex flex-col gap-2">
-            <div class="flex flex-col gap-2">
-              <span class="text-2xl font-bold">Interaction count</span>
-            </div>
-            <div class="flex justify-between">
-              <div class="flex gap-3">
-                <span class="text-4xl font-bold">120 522</span>
-                <i class="pi pi-heart-fill text-4xl red"></i>
-              </div>
-              <div class="flex gap-3">
-                <span class="text-4xl font-bold">35 182</span>
-                <i class="pi pi-undo text-4xl"></i>
-              </div>
-            </div>
+      </div>
+    </div>
+    <div class="card rounded-xl h-[15vh]">
+      <div class="flex flex-row justify-between">
+        <div class="flex flex-col p-7 gap-2">
+          <span class="text-2xl font-bold">Avg Sentiment</span>
+          <span class="text-5xl font-bold">0.4</span>
+        </div>
+        <div class="max-h-[100px] max-w-[100px] p-4 mt-2 mr-2">
+          <p-chart type="pie" [data]="sentiment" />
+        </div>
+      </div>
+    </div>
+    <div class="card rounded-xl h-[15vh] p-7">
+      <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2">
+          <span class="text-2xl font-bold">Interaction count</span>
+        </div>
+        <div class="flex justify-between">
+          <div class="flex gap-3">
+            <span class="text-4xl font-bold">120 522</span>
+            <i class="pi pi-heart-fill text-4xl red"></i>
+          </div>
+          <div class="flex gap-3">
+            <span class="text-4xl font-bold">35 182</span>
+            <i class="pi pi-undo text-4xl"></i>
           </div>
         </div>
       </div>
-      <div class="card rounded-xl p-7 h-full">
-          <p-chart type="bar" [data]="data" />
-      </div>
+    </div>
+  </div>
+  <div class="card rounded-xl p-7 h-full">
+    <p-chart type="bar" [data]="data" />
+  </div>
 </div>
