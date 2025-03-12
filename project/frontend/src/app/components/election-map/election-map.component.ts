@@ -100,7 +100,6 @@ export class ElectionMapComponent implements OnInit, OnChanges {
       state.properties.bidenSentiment = Number((Math.random() * 2 - 1).toFixed(1));
       state.properties.trumpAmount = Number((Math.random() * 100000- 1).toFixed(0));
       state.properties.bidenAmount = Number((Math.random() * 100000 - 1).toFixed(0));
-      state.properties.tooltipContent = this.generateTooltip(state);
     });
   }
 
@@ -170,24 +169,6 @@ export class ElectionMapComponent implements OnInit, OnChanges {
       dashArray: '3',
       fillOpacity: 0.8,
     };
-  }
-
-  /**
-   * Generates tooltip content for a given state.
-   * @param state - The state object containing properties.
-   * @returns HTML string representing the tooltip content.
-   */
-  generateTooltip(state: State) {
-    return `
-    <div class="tooltip-container">
-        <strong>State: ${state.properties.name}</strong><br>
-        <span class="tooltip-sentiment">.</span>
-        <span>Overall sentiment: ${state.properties.sentiment}</span><br>
-        <span class="tooltip-red">.</span>
-        <span>Trump sentiment: ${state.properties.trumpSentiment}</span><br>
-        <span class="tooltip-blue">.</span>
-        <span>Biden sentiment: ${state.properties.bidenSentiment}</span>
-    </div>`;
   }
 
   /**

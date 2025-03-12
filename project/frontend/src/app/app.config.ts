@@ -11,6 +11,7 @@ import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
 import { routes } from './app.routes';
 import { CustomPreset } from '../styles';
+import { provideHttpClient } from '@angular/common/http';
 
 const config: SocketIoConfig = { url: 'http://localhost:8988', options: {} };
 
@@ -18,6 +19,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    provideHttpClient(),
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {

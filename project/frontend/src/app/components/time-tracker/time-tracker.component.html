@@ -6,11 +6,17 @@
     >
       <div class="flex flex-col gap-3">
         <span class="text-2xl font-bold">Trump Sentiment</span>
-        <span class="text-5xl font-bold">12%</span>
+        <span class="text-5xl font-bold"
+          >{{ changeTracker().trumpChange }}%</span
+        >
       </div>
       <i
-        class="pi pi-angle-double-up text-8xl ml-2"
-        style="color: var(--p-primary-green)"
+        [class]="
+          changeTracker().trumpChange < 0
+            ? 'pi pi-angle-double-up up'
+            : 'pi pi-angle-double-down down'
+        "
+        class="text-8xl ml-2"
       ></i>
     </div>
     <!-- CARD -->
@@ -19,11 +25,17 @@
     >
       <div class="flex flex-col gap-3">
         <span class="text-2xl font-bold">Biden Sentiment</span>
-        <span class="text-5xl font-bold">-3%</span>
+        <span class="text-5xl font-bold"
+          >{{ changeTracker().bidenChange }}%</span
+        >
       </div>
       <i
-        class="pi pi-angle-double-down text-8xl ml-2"
-        style="color: var(--p-primary-orange)"
+        [class]="
+          changeTracker().bidenChange < 0
+            ? 'pi pi-angle-double-up up'
+            : 'pi pi-angle-double-down down'
+        "
+        class="text-8xl ml-2"
       ></i>
     </div>
     <!-- CARD -->
@@ -32,11 +44,17 @@
     >
       <div class="flex flex-col gap-3">
         <span class="text-2xl font-bold">Overall Sentiment</span>
-        <span class="text-5xl font-bold">-5%</span>
+        <span class="text-5xl font-bold"
+          >{{ changeTracker().totalChange }}%</span
+        >
       </div>
       <i
-        class="pi pi-angle-double-down text-8xl ml-2"
-        style="color: var(--p-primary-orange)"
+        [class]="
+          changeTracker()!.totalChange < 0
+            ? 'pi pi-angle-double-up up'
+            : 'pi pi-angle-double-down down'
+        "
+        class="text-8xl ml-2"
       ></i>
     </div>
   </div>
