@@ -1,5 +1,5 @@
 import asyncio
-from backend.db.connection import Database
+from project.backend.to_be_removed.connection import Database
 
 async def seed():
     db = Database()

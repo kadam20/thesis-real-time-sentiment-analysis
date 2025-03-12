@@ -4,7 +4,7 @@ import asyncio
 import json
 import os
 from dotenv import load_dotenv
-from backend.db.connection import SyncDatabase
+from project.backend.to_be_removed.connection import SyncDatabase
 from backend.api.listener import listen_to_postgres
 import threading
 import time
