@@ -4,7 +4,7 @@ import asyncio
 import json
 import os
 from dotenv import load_dotenv
-from project.backend.to_be_removed.connection import SyncDatabase
+from backend.remove.connection import Database
 from backend.api.listener import listen_to_postgres
 import threading
 import time
@@ -20,23 +20,10 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-db = SyncDatabase()
-db.init_connection()
+db = Database()
+db.init_pool()
 
 _TEST_KEYS = ["user_name", "tweet", "likes", "candidate", "sentiment_score", "retweet_count"]
-
-@app.route("/test", methods=["GET"])
-def get_tweets():
-    """Fetch all tweets from the database."""
-    try:
-        query = "SELECT user_name, tweet, likes, candidate, sentiment_score, retweet_count FROM tweets LIMIT 5;"
-        result = db.fetch(query)
-        print("RES", result)
-        return jsonify([dict(zip(_TEST_KEYS, item)) for item in result])
-    except Exception as e:
-        print(e)
-        return jsonify({"error": str(e)}), 500
-
 
 # WebSocket Event Handlers
 @socketio.on("connect")

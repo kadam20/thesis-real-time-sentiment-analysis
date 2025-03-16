@@ -7,7 +7,6 @@ socket_app = socketio.ASGIApp(sio)
 @sio.event
 async def connect(sid, environ):
     print(f"Client {sid} connected")
-    await sio.emit("message", {"data": "Welcome to the Tweet Stream!"}, room=sid)
 
 @sio.event
 async def disconnect(sid):

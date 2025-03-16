@@ -29,6 +29,7 @@ def stream_data_to_kafka(producer, config):
         time.sleep(config["SLEEP_TIME"])
     
     # After all data is sent close producer
+    print('Producer ran out of data.')
     producer.close()
 
 def main():
