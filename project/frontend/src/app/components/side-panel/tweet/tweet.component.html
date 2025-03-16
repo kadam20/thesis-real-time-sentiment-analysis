@@ -1,14 +1,17 @@
+@if(tweet().sentiment_score){
 <div class="flex flex-col gap-4 p-4 rounded-xl tweet">
   <div class="flex justify-between">
     <div class="flex items-center gap-2">
-      <i class="pi pi-user"></i><span> &#64;{{ tweet().userName }}</span>
+      <i class="pi pi-user"></i
+      ><span class="truncate max-w-[100px]"> &#64;{{ tweet().user_name }}</span>
     </div>
     <div class="flex gap-3">
       <div class="flex items-center gap-2">
-        <span> {{ tweet().retweetCount}} </span><i class="pi pi-undo"></i>
+        <span> {{ tweet().retweet_count }} </span><i class="pi pi-undo"></i>
       </div>
       <div class="flex items-center gap-2">
-        <span>{{ tweet().likes }} </span><i class="pi pi-heart-fill" style="color: red"></i>
+        <span>{{ tweet().likes }} </span
+        ><i class="pi pi-heart-fill" style="color: var(--p-primary-red)"></i>
       </div>
     </div>
   </div>
@@ -29,6 +32,8 @@
     </div>
     } }
 
-    <div><p-tag [value]="tweet().sentimentScore" /></div>
+    <div><p-tag [value]="tweet().sentiment_score.toFixed(2)" /></div>
   </div>
 </div>
+
+}

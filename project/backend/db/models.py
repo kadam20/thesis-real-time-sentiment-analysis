@@ -39,3 +39,14 @@ class TweetBase(BaseModel):
     candidate: str
     sentiment_label: str
     sentiment_score: float
+
+class States(Base):
+    __tablename__ = "states"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    state_name= Column(String)
+    coordinates = Column(String)
+
+class StatesBase(BaseModel):
+    state_name: str
+    coordinates: str

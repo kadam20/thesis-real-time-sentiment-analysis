@@ -17,6 +17,8 @@ import { LocalstorageService } from '../../services/localstorage.service';
 import { State } from '../../models/state.model';
 import { TooltipOptions } from 'leaflet';
 import { MapTooltipComponent } from './map-tooltip/map-tooltip.component';
+import { DataService } from '../../services/data.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-election-map',
@@ -30,6 +32,7 @@ import { MapTooltipComponent } from './map-tooltip/map-tooltip.component';
 })
 export class ElectionMapComponent implements OnInit, OnChanges {
   localStorageService = inject(LocalstorageService);
+  dataService = inject(DataService);
   map: L.Map;
   geojson: any;
   statesData: State[] = statesData.features;
@@ -41,9 +44,10 @@ export class ElectionMapComponent implements OnInit, OnChanges {
   private _componentRef: ComponentRef<MapTooltipComponent>;
   private _applicationRef = inject(ApplicationRef);
 
-  ngOnInit(): void {
+
+  async ngOnInit() {
+    await this.mapData();
     this.getMapStyle();
-    this.mapData();
     this.mapInit();
     this.buildTooltip()    
   }
@@ -93,7 +97,8 @@ export class ElectionMapComponent implements OnInit, OnChanges {
   /**
    * Populates statesData with sentiment values and generates tooltips.
    */
-  mapData() {
+  async mapData() {
+    const mapData = await firstValueFrom(this.dataService.getElectionMap())
     this.statesData.forEach((state: State) => {
       state.properties.sentiment = Number((Math.random() * 2 - 1).toFixed(1));
       state.properties.trumpSentiment = Number((Math.random() * 2 - 1).toFixed(1));

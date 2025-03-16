@@ -67,6 +67,12 @@ async def get_tweet_stats(db: Session = Depends(get_db)):
             func.sum(case((models.Tweets.sentiment_score >= 0, 1), else_=0)).label(
                 "total_positive"
             ),
+            func.sum(case((models.Tweets.candidate != 'biden', 1), else_=0)).label(
+                "total_trump"
+            ),
+            func.sum(case((models.Tweets.candidate != 'trump', 1), else_=0)).label(
+                "total_biden"
+            ),
         ).first()
 
         # Create a dictionary to store the tweet statistics
@@ -81,6 +87,8 @@ async def get_tweet_stats(db: Session = Depends(get_db)):
             ),
             "total_negative": result.total_negative,
             "total_positive": result.total_positive,
+            "total_trump": result.total_trump,
+            "total_biden": result.total_biden,
         }
 
         return JSONResponse(content=tweet_stats)

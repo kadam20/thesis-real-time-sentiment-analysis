@@ -10,7 +10,7 @@ export class DataService {
     constructor(private http: HttpClient) {}
 
     getLatestTweets(): Observable<any> {
-        return this.http.get<any>(`${environment.socketUrl}/tweets`)
+        return this.http.get<any>(`${environment.socketUrl}/top-tweets`)
     }
 
     getTimelineData(): Observable<any> {
@@ -18,10 +18,18 @@ export class DataService {
     }
 
     getTotalData(): Observable<any> {
-        return this.http.get<any>(`${environment.socketUrl}/total-data`)
+        return this.http.get<any>(`${environment.socketUrl}/tweet-stats`)
     }
 
     getSentimentBins(): Observable<any> {
         return this.http.get<any>(`${environment.socketUrl}/sentiment-bins`)
+    }
+
+    getElectionMap(): Observable<any> {
+        return this.http.get<any>(`${environment.socketUrl}/election-map`)
+    }
+
+    getTest(): Observable<any> {
+        return this.http.get<any>(`${environment.socketUrl}/test`)
     }
 }

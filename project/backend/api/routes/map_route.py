@@ -20,6 +20,15 @@ async def get_election_map(db: Session = Depends(get_db)):
                 func.round(
                     cast(
                         func.avg(
+                           models.Tweets.sentiment_score
+                        ),
+                        Numeric,
+                    ),
+                    2,
+                ).label("total_avg_sentiment"),
+                func.round(
+                    cast(
+                        func.avg(
                             case(
                                 (
                                     models.Tweets.candidate.in_(["biden", "both"]),
@@ -70,10 +79,11 @@ async def get_election_map(db: Session = Depends(get_db)):
         election_map = [
             {
                 "state_code": row[0],
-                "biden_avg_sentiment": float(row[1]) if row[1] is not None else None,
-                "biden_count": row[2],
-                "trump_avg_sentiment": float(row[3]) if row[3] is not None else None,
-                "trump_count": row[4],
+                "total_avg_sentiment": float(row[1]) if row[1] is not None else None,
+                "biden_avg_sentiment": float(row[2]) if row[2] is not None else None,
+                "biden_count": row[3],
+                "trump_avg_sentiment": float(row[4]) if row[4] is not None else None,
+                "trump_count": row[5],
             }
             for row in results
         ]
@@ -82,4 +92,3 @@ async def get_election_map(db: Session = Depends(get_db)):
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
-

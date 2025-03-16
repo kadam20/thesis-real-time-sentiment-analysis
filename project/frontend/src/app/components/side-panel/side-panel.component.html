@@ -1,13 +1,13 @@
-<div class="app-side-panel h-full rounded-xl p-7 card flex flex-col gap-7">
-    <div class="flex justify-between">
-        <span class="font-bold">Live Feed</span>
-        <span>{{ currentTime | date: 'HH:mm:ss' }}</span>
-    </div>
-    <div class="flex flex-col gap-7">
-        @if (tweets.length>0){
-            @for(tweet of tweets(); track tweet){
-                <app-tweet [tweet]="tweet"></app-tweet>
-            }
-        }
-    </div>
+<div
+  class="app-side-panel h-full rounded-xl p-7 card flex flex-col gap-5 overflow-y-hidden max-h-[88vh]"
+>
+  <div class="flex justify-between">
+    <span class="font-bold">Live Feed</span>
+    <span>{{ currentTime | date : "HH:mm:ss" }}</span>
+  </div>
+  <div class="flex flex-col gap-5">
+    @if (tweets().length>0){ @for(tweet of tweets(); track tweet){
+    <app-tweet [tweet]="tweet"></app-tweet>
+    } }
+  </div>
 </div>
