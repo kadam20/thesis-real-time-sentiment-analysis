@@ -5,39 +5,42 @@ import time
 import json
 import os
 
-print('producer.py')
-# Load environment variables
-dotenv_path = os.path.join(os.path.dirname(__file__), "../.env")
-load_dotenv(dotenv_path)
+def load_env():
+    # Load configuration data from env
+    dotenv_path = os.path.join(os.path.dirname(__file__), "../.env")
+    load_dotenv(dotenv_path)
+    csv_file_path = os.path.join(os.path.dirname(__file__), "tweet_data.csv")
+    return {
+        "KAFKA_TOPIC": os.getenv("KAFKA_TOPIC"),
+        "KAFKA_SERVER": os.getenv("KAFKA_SERVER"),
+        "SLEEP_TIME": int(os.getenv("SLEEP_TIME", 1)),
+        "CSV_FILE": csv_file_path
+    }
 
-# Kafka Configuration
-KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
-KAFKA_SERVER = os.getenv("KAFKA_SERVER")
+def stream_data_to_kafka(producer, config):
+    # Read data from CSV
+    data = pd.read_csv(config["CSV_FILE"], lineterminator="\n")
 
-# Sleep time between messages
-sleep_time = os.getenv("SLEEP_TIME")
+    # Go through data to imitate real time data flow
+    for _, row in data.iterrows():
+        message = row.to_dict()
+        producer.send(config["KAFKA_TOPIC"], value=message)
+        print('Message: ', message)
+        time.sleep(config["SLEEP_TIME"])
+    
+    # After all data is sent close producer
+    producer.close()
 
-# Create Kafka producer
-producer = KafkaProducer(
-    bootstrap_servers=KAFKA_SERVER,
-    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-)
+def main():
+    # Load config 
+    config = load_env()
+    # Initialize Kafka producer
+    producer = KafkaProducer(
+        bootstrap_servers=config["KAFKA_SERVER"],
+        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+    )
+    # Start real time data stream
+    stream_data_to_kafka(producer, config)
 
-print(producer)
-
-# CSV File Path
-CSV_FILE = "tweet_data.csv"
-
-# Read the CSV file
-data = pd.read_csv(CSV_FILE, lineterminator="\n")
-# Stream data to Kafka
-for index, row in data.iterrows():
-    # Convert the row to a dictionary
-    message = row.to_dict()
-    print('Message: ', message)
-    producer.send(KAFKA_TOPIC, value=message)
-    print(f"Sent to Kafka: {message}")
-    # Simulate real-time streaming
-    time.sleep(int(sleep_time))
-
-producer.close()
+if __name__ == "__main__":
+    main()

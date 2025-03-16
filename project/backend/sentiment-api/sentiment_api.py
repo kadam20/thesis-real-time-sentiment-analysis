@@ -1,67 +1,54 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from transformers import pipeline
+import uvicorn
 
-app = Flask(__name__)
+app = FastAPI()
 
 # Initialize the BERT sentiment analysis pipeline
 sentiment_analyzer = pipeline("sentiment-analysis")
 
 # Define keywords and hashtags for Trump and Biden
-TRUMP_KEYWORDS = ["Trump", "@realDonaldTrump", "#MAGA", "#Trump2024"]
-BIDEN_KEYWORDS = ["Biden", "@JoeBiden", "#Biden", "#Biden2024", "#BuildBackBetter"]
+TRUMP_KEYWORDS = ["Trump", "Donald", "#MAGA"]
+BIDEN_KEYWORDS = ["Biden", "Joe", "#BuildBackBetter"]
 
-@app.route("/")
+class SentimentRequest(BaseModel):
+    text: str
+
+def get_candidate(text: str):
+    # Determine candidate attribution
+    is_trump = any(keyword.lower() in text.lower() for keyword in TRUMP_KEYWORDS)
+    is_biden = any(keyword.lower() in text.lower() for keyword in BIDEN_KEYWORDS)
+
+    if is_trump and not is_biden:
+        return "trump"
+    elif is_biden and not is_trump:
+        return "biden"
+    else:
+        return "both"
+
+@app.get("/")
 def home():
-    return "Sentiment Analysis API is running with BERT!"
+    return {"message": "Sentiment Analysis API is running with BERT!"}
 
-
-@app.route("/analyze", methods=["POST"])
-def analyze_sentiment():
+@app.post("/analyze")
+def analyze_sentiment(request: SentimentRequest):
     try:
-        if not request.is_json:
-            return jsonify({"error": "Request must be in JSON format."}), 400
-        # Get the input data from the request
-        data = request.get_json()
-
-        if not data or "text" not in data:
-            return (
-                jsonify({"error": "Please provide text for sentiment analysis."}),
-                400,
-            )
-
-        text = data["text"]
-
+        text = request.text
         # Perform sentiment analysis using BERT
         sentiment_result = sentiment_analyzer(text)
-
-       # Determine candidate attribution
-        is_trump = any(keyword in text.lower() for keyword in [TRUMP_KEYWORDS])
-        is_biden = any(keyword in text.lower() for keyword in [BIDEN_KEYWORDS])
-
-        if is_trump and is_biden:
-            candidate = "both"
-        elif is_trump:
-            candidate = "trump"
-        elif is_biden:
-            candidate = "biden"
-        else:
-            candidate = "neutral or unrelated"
-
         # Prepare the response
-        response = {
+        return {
             "text": text,
             "sentiment": {
                 "label": sentiment_result[0]["label"],
                 "score": sentiment_result[0]["score"],
-                 "candidate": candidate,
+                "candidate": get_candidate(text),
             },
         }
-
-        return jsonify(response)
-
+        
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
+        raise HTTPException(status_code=500, detail=str(e))
+    
 if __name__ == "__main__":
-    app.run(debug=True)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
