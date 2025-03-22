@@ -1,32 +1,50 @@
 import { Injectable } from '@angular/core';
-import io from 'socket.io-client';
-import { environment } from '../../environments/environment.development';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SocketService {
-  // socket = io(environment.socketUrl);
-
+  private socket: WebSocket;
   private tweetsSubject = new BehaviorSubject<any[]>([]);
   tweets$ = this.tweetsSubject.asObservable();
 
-  connect(){
-    // try {
-    //   console.log('Connecting to server');
-    //   this.socket.on('new_data', (tweet) => {
-    //     console.log(tweet);
-    //     this.tweetsSubject.next([...this.tweetsSubject.getValue(), tweet]);
-    //   });
-    //   this.socket.on('connect', () => {
-    //     console.log('Connected to server');
-    // });
-    // this.socket.on('disconnect', () => {
-    //     console.log('Disconnected from server');
-    // });
-    // } catch (error) {
-    //   console.error('Error:', error);
-    // }
+  constructor() {
+    this.socket = new WebSocket('ws://localhost:8000/ws');
+
+    // Event: Connection opened
+    this.socket.onopen = () => {
+      console.log('WebSocket connection established');
+      this.socket.send(JSON.stringify({ event: 'connect', message: 'Hello Server!' }));
+    };
+
+    // Event: Receiving messages
+    this.socket.onmessage = (event) => {
+      console.log('Message received from server:', event.data);
+      const data = JSON.parse(event.data);
+
+      // Listen to 'new_data' event
+      if (data.event === 'new_data') {
+        this.tweetsSubject.next([...this.tweetsSubject.value, data.payload]);
+      }
+    };
+
+    // Event: Connection closed
+    this.socket.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    // Event: Connection error
+    this.socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  }
+
+  sendMessage(message: string) {
+    this.socket.send(JSON.stringify({ event: 'message', payload: message }));
+  }
+
+  closeConnection() {
+    this.socket.close();
   }
 }

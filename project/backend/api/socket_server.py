@@ -13,6 +13,6 @@ async def disconnect(sid):
     print(f"Client {sid} disconnected")
 
 @sio.event
-async def send_message(sid, data):
-    print(f"Message from {sid}: {data}")
-    await sio.emit("new_data", {"data": data}, skip_sid=sid)
+async def send_message(data):
+    print(f"Message from socket: {data}")
+    await sio.emit("new_data", {"data": data})

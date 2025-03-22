@@ -1,40 +1,38 @@
 import asyncio
 import os
-import psycopg2
+import asyncpg
 from dotenv import load_dotenv
 
 dotenv_path = os.path.join(os.path.dirname(__file__), "../.env")
 load_dotenv(dotenv_path)
 
-async def listen_to_postgres(sio):
+async def listen_to_postgres(callback):
     try:
-        conn = psycopg2.connect(
+        conn = await asyncpg.connect(
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             database=os.getenv("DB_NAME"),
             host="localhost",
             port=os.getenv("DB_PORT"),
         )
-        conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
-        cursor = conn.cursor()
-        cursor.execute(f"LISTEN new_data;")
         print("Listening on channel: new_data")
 
-        def handle_notify():
-            conn.poll()
-            for notify in conn.notifies:
-                print(f"Received notification: {notify.payload}")
-                asyncio.create_task(sio.emit("new_data", {"message": notify.payload}))
-            conn.notifies.clear()
+        async def handle_notify(connection, pid, channel, payload):
+            print(f"Received notification: {payload}")
 
-        loop = asyncio.get_event_loop()
-        loop.add_reader(conn, handle_notify)
-        await asyncio.Event().wait() # keeps the loop running
+            asyncio.create_task(callback(payload))
+
+
+        await conn.add_listener("new_data", handle_notify)
+
+        # Keep the connection alive
+        while True:
+            await asyncio.sleep(1)
 
     except Exception as e:
         print(f"Error listening to Postgres notifications: {e}")
     finally:
-        if "conn" in locals() and conn:
+        if conn:
             print("Closing connection to the database")
-            conn.close()
+            await conn.close()

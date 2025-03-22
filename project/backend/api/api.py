@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import backend.db.models as models
 from backend.db.database import engine
-from backend.api.socket_server import socket_app
 from backend.api.routes import (
     comparison_route,
     map_route,
@@ -12,9 +11,13 @@ from backend.api.routes import (
 )
 import socketio
 import asyncio
-from backend.api.listener import listen_to_postgres
-from contextlib import asynccontextmanager
-import threading
+# from backend.api.listener import listen_to_postgres
+# from contextlib import asynccontextmanager
+# import threading
+# from fastapi import BackgroundTasks
+import os
+import asyncpg
+
 
 
 # Create an ASGI Socket.IO Server
@@ -33,7 +36,7 @@ socket_app = socketio.ASGIApp(sio)
 app = FastAPI()
 
 # Mount the Socket.IO app inside FastAPI under `/ws`
-app.mount("/ws", socket_app)
+app.mount("/", socket_app)
 
 # Create tables
 models.Base.metadata.create_all(bind=engine)
@@ -57,9 +60,40 @@ app.include_router(sidebar_route.router)
 async def root():
     return {"message": "Tweet api works"}
 
+@sio.on("connect")
+async def connect(sid, env):
+    print("New Client Connected to This id :"+" "+str(sid))
+
+@sio.on("disconnect")
+async def disconnect(sid):
+    print("Client Disconnected: "+" "+str(sid))
+
+
 async def main():
     # Start the async Postgres listener
-    asyncio.create_task(listen_to_postgres(sio))
+    conn = await asyncpg.connect(
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        host="localhost",
+        port=os.getenv("DB_PORT"),
+    )
+
+    print("Listening on channel: new_data")
+
+    async def handle_notify(connection, pid, channel, payload):
+        print(f"Received notification: {payload}")
+        await sio.emit("new_data", "jarjar binks")
+
+
+    print("VERSIONS")
+    print(socketio.__version__)
+    asd
+
+    await conn.add_listener("new_data", handle_notify)
+    print("asdc")
+
+    await sio.emit("LAJOS", "LAJOS?")
 
     # Run the FastAPI application
     config = uvicorn.Config(app, host="0.0.0.0", port=8000)
