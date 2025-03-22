@@ -5,7 +5,7 @@ import json
 import os
 from dotenv import load_dotenv
 from backend.remove.connection import Database
-from backend.api.listener import listen_to_postgres
+from project.backend.remove.listener import listen_to_postgres
 import threading
 import time
 from flask_cors import CORS

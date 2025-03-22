@@ -1,45 +1,58 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from backend.api.ws_client_pool import WSClientPool
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-import backend.db.models as models
-from backend.db.database import engine
+from contextlib import asynccontextmanager
 from backend.api.routes import (
     comparison_route,
     map_route,
     timeline_route,
     sidebar_route,
 )
-import socketio
-import asyncio
-# from backend.api.listener import listen_to_postgres
-# from contextlib import asynccontextmanager
-# import threading
-# from fastapi import BackgroundTasks
-import os
 import asyncpg
+import asyncio
+import uvicorn
+import dotenv
+import os
 
 
+dotenv.load_dotenv()
+pool = None
+conn = None
 
-# Create an ASGI Socket.IO Server
-sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-socket_app = socketio.ASGIApp(sio)
 
-# @asynccontextmanager
-# async def lifespan(the_app):
-#     print("startup")
-#     await listen_to_postgres(socket_app)
-#     yield
-#     print("shutdown")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global conn, pool
+    pool = WSClientPool()
 
-# Initialize FastAPI
-# app = FastAPI(lifespan=lifespan)
-app = FastAPI()
+    conn = await asyncpg.connect(
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        host="localhost",
+        port=os.getenv("DB_PORT"),
+    )
 
-# Mount the Socket.IO app inside FastAPI under `/ws`
-app.mount("/", socket_app)
+    print("Listening on channel: new_data")
 
-# Create tables
-models.Base.metadata.create_all(bind=engine)
+    async def handle_notify(connection, pid, channel, payload):
+        print(f"Received notification: {payload}")
+        await pool.emit(payload)
+
+    await conn.add_listener("new_data", handle_notify)
+    print("Registered pg listener")
+
+    # Start the pool's serving loop
+    asyncio.create_task(pool.serve())
+
+    yield
+
+    # Clean up on shutdown
+    await conn.close()
+    print("Database connection closed")
+
+
+app = FastAPI(lifespan=lifespan)
 
 # CORS Middleware
 app.add_middleware(
@@ -56,50 +69,27 @@ app.include_router(map_route.router)
 app.include_router(timeline_route.router)
 app.include_router(sidebar_route.router)
 
+
 @app.get("/")
-async def root():
-    return {"message": "Tweet api works"}
-
-@sio.on("connect")
-async def connect(sid, env):
-    print("New Client Connected to This id :"+" "+str(sid))
-
-@sio.on("disconnect")
-async def disconnect(sid):
-    print("Client Disconnected: "+" "+str(sid))
+async def read_root():
+    return {"message": "Hello, World!"}
 
 
-async def main():
-    # Start the async Postgres listener
-    conn = await asyncpg.connect(
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        host="localhost",
-        port=os.getenv("DB_PORT"),
-    )
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    pool.add_client(websocket)
 
-    print("Listening on channel: new_data")
-
-    async def handle_notify(connection, pid, channel, payload):
-        print(f"Received notification: {payload}")
-        await sio.emit("new_data", "jarjar binks")
+    try:
+        while True:
+            await websocket.receive_text()
+    except (WebSocketDisconnect, RuntimeError):
+        pool.remove_client(websocket)
 
 
-    print("VERSIONS")
-    print(socketio.__version__)
-    asd
+def main():
+    uvicorn.run("backend.api.api:app", host="127.0.0.1", port=8000, reload=True)
 
-    await conn.add_listener("new_data", handle_notify)
-    print("asdc")
-
-    await sio.emit("LAJOS", "LAJOS?")
-
-    # Run the FastAPI application
-    config = uvicorn.Config(app, host="0.0.0.0", port=8000)
-    server = uvicorn.Server(config)
-    await server.serve()
 
 if __name__ == "__main__":
-    asyncio.run(main())
-
+    main()
