@@ -6,7 +6,12 @@ import dotenv
 import asyncio
 from contextlib import asynccontextmanager
 import uvicorn
-from fastapi.responses import HTMLResponse
+from backend.api.routes import (
+    comparison_route,
+    map_route,
+    timeline_route,
+    sidebar_route,
+)
 
 
 dotenv.load_dotenv()
@@ -57,51 +62,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(comparison_route.router)
+app.include_router(map_route.router)
+app.include_router(timeline_route.router)
+app.include_router(sidebar_route.router)
+
 @app.get("/")
 async def read_root():
     return {"message": "Hello, World!"}
-
-
-html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Chat</title>
-    </head>
-    <body>
-        <h1>WebSocket Chat</h1>
-        <form action="" onsubmit="sendMessage(event)">
-            <input type="text" id="messageText" autocomplete="off"/>
-            <button>Send</button>
-        </form>
-        <ul id='messages'>
-        </ul>
-        <script>
-            var ws = new WebSocket("ws://localhost:8000/ws");
-            ws.onmessage = function(event) {
-                console.log("GOT MESSAGE")
-                console.log(event)
-                var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
-            };
-            function sendMessage(event) {
-                var input = document.getElementById("messageText")
-                ws.send(input.value)
-                input.value = ''
-                event.preventDefault()
-            }
-        </script>
-    </body>
-</html>
-"""
-
-
-@app.get("/test")
-async def get():
-    return HTMLResponse(html)
 
 class WSClientPool:
     def __init__(self):
@@ -126,7 +95,7 @@ class WSClientPool:
             for client in self.clients:
                 try:
                     print("Sending", payload, "to", client)
-                    await client.send_text("Payload: " + payload)
+                    await client.send_json("Payload: " + payload)
                 except Exception as e:
                     print(f"Error sending to {client}: {e}")
                     self.remove_client(client)
