@@ -4,6 +4,7 @@ import { TweetComponent } from './tweet/tweet.component';
 import { Subscription } from 'rxjs';
 import { SocketService } from '../../services/socket.service';
 import { DataService } from '../../services/data.service';
+import { Tweet } from '../../models/tweet.model';
 
 @Component({
   selector: 'app-side-panel',
@@ -14,17 +15,14 @@ import { DataService } from '../../services/data.service';
 })
 export class SidePanelComponent implements OnInit, OnDestroy {
   currentTime = new Date();
-  private intervalId: any;
-  private tweetsSubscription!: Subscription;
   socketService = inject(SocketService)
-  tweets = signal<any[]>([]);
+  tweets = signal<Tweet[]>([]);
   dataService = inject(DataService)
+  private tweetsSubscription!: Subscription;
+  private intervalId: any;
 
   ngOnInit() {
-    console.log('side panel connect')
     this.dataService.getLatestTweets().subscribe((tweets) => {
-      console.log('tweets');
-      console.log(tweets);
       this.tweets.set(tweets);
     });
 
@@ -32,8 +30,8 @@ export class SidePanelComponent implements OnInit, OnDestroy {
       this.currentTime = new Date();
     }, 1000);
 
-    this.tweetsSubscription = this.socketService.tweets$.subscribe((tweet) => {
-      this.tweets.set([...this.tweets(), tweet]);
+    this.tweetsSubscription = this.socketService.tweets$.subscribe((tweet:any) => {
+      this.tweets.set([tweet, ...this.tweets().slice(0, -1)]);
     });
   }
 

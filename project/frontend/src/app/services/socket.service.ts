@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { Tweet } from '../models/tweet.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SocketService {
   private socket: WebSocket;
-  private tweetsSubject = new BehaviorSubject<any[]>([]);
+  private tweetsSubject = new BehaviorSubject<Tweet | undefined>(undefined);
   tweets$ = this.tweetsSubject.asObservable();
 
   constructor() {
@@ -25,7 +26,7 @@ export class SocketService {
 
       // Listen to 'new_data' event
       if (data.event === 'new_data') {
-        this.tweetsSubject.next([...this.tweetsSubject.value, data.payload]);
+        this.tweetsSubject.next(data.payload);
       }
     };
 

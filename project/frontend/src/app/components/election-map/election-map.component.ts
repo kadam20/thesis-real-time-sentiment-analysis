@@ -82,7 +82,7 @@ export class ElectionMapComponent implements OnInit, OnChanges {
     polygon.bindTooltip('', {
       className: 'state-tooltip',
       opacity: 1,
-      data: { state: state },
+      data: { state: state }, 
     } as TooltipOptions);
   }
 

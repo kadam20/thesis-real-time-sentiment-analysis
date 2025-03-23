@@ -1,5 +1,6 @@
 import { Component, input } from '@angular/core';
 import { TagModule } from 'primeng/tag';
+import { Tweet } from '../../../models/tweet.model';
 
 @Component({
   selector: 'app-tweet',
@@ -9,5 +10,5 @@ import { TagModule } from 'primeng/tag';
   styleUrl: './tweet.component.scss'
 })
 export class TweetComponent {
-  tweet = input.required<any>()
+  tweet = input.required<Tweet>()
 }

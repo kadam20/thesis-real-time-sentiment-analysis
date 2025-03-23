@@ -1,13 +1,12 @@
 export class Tweet {
-    id: number;
-    tweet: string;
-    likes: number; 
-    retweetCount: number;
-    userName: string; 
-    userFollower: number;
-    state: string;
-    stateCode: string;
-    candidate: string;
-    sentimentLabel: string;
-    sentimentScore: string;
+    tweet: string
+    likes: number
+    retweet_count: number
+    user_name: string
+    user_followers_count: number
+    state: string
+    state_code: string
+    candidate: string
+    sentiment_label: string
+    sentiment_score: number
 }
