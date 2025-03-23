@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ChartModule } from 'primeng/chart';
 import { firstValueFrom } from 'rxjs';
 import { DataService } from '../../services/data.service';
@@ -6,6 +13,7 @@ import { SocketService } from '../../services/socket.service';
 import { UtilsService } from '../../services/utils.service';
 import { Tweet } from '../../models/tweet.model';
 import { ComparisonData, SentimentBins } from '../../models/comparison.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-comparison',
@@ -15,6 +23,7 @@ import { ComparisonData, SentimentBins } from '../../models/comparison.model';
   styleUrls: ['./comparison.component.scss'],
 })
 export class ComparisonComponent implements OnInit {
+  private readonly _destroyRef = inject(DestroyRef);
   dataService = inject(DataService);
   socketService = inject(SocketService);
   utilsService = inject(UtilsService);
@@ -71,9 +80,11 @@ export class ComparisonComponent implements OnInit {
     });
 
     // Listening for new tweets
-    this.socketService.tweets$.subscribe((tweet) => {
-      this.handleNewTweet(tweet);
-    });
+    this.socketService.tweets$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((tweet) => {
+        this.handleNewTweet(tweet as Tweet);
+      });
   }
 
   /**
@@ -81,11 +92,10 @@ export class ComparisonComponent implements OnInit {
    * @param {Tweet} tweet Data for the new tweet.
    */
   handleNewTweet(tweet?: Tweet) {
-    if(!tweet ) return;
+    if (!tweet) return;
     this.comparisonData.update((prev) =>
       this.utilsService.handleNewTweet(prev, tweet)
     );
-    // this.updateChartData();
   }
 
   /**
@@ -124,50 +134,4 @@ export class ComparisonComponent implements OnInit {
       ],
     };
   }
-
-//   /**
-//    * Updates the chart data for all three charts: tweet data, sentiment data, and sentiment bins.
-//    */
-//   private updateChartData() {
-//     this.updateTweetData();
-//     this.updateSentimentData();
-//     this.updateBinData();
-//   }
-
-//   /**
-//    * Updates the tweet data chart with the latest values.
-//    * This updates the data for Trump and Biden total tweet counts.
-//    */
-//   private updateTweetData() {
-//     this.comparisonData.update((prev) => ({
-//       ...prev,
-//       tweetPie: this.createPieData(
-//         [prev.tweetValues!.total_trump, prev.tweetValues!.total_biden],
-//         [this.colorStyles.red, this.colorStyles.blue]
-//       ),
-//     }));
-//   }
-
-//   /**
-//    * Updates the sentiment data chart with the latest positive and negative sentiment counts.
-//    */
-//   private updateSentimentData() {
-//     this.comparisonData.update((prev) => ({
-//       ...prev,
-//       sentimentPie: this.createPieData(
-//         [prev.tweetValues!.total_positive, prev.tweetValues!.total_negative],
-//         [this.colorStyles.orange, this.colorStyles.green]
-//       ),
-//     }));
-//   }
-
-//   /**
-//    * Updates the sentiment bin chart with the latest bin values.
-//    */
-//   private updateBinData() {
-//     this.comparisonData.update(prev => ({
-//       ...prev,
-//       dataBins: this.createBinData(),
-//     }));
-//   }
 }
