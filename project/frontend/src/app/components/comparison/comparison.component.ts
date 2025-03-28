@@ -15,11 +15,12 @@ import { Tweet } from '../../models/tweet.model';
 import { ComparisonData, SentimentBins } from '../../models/comparison.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService } from '../../services/layout.service';
+import { CardComponent } from '../_layout/card/card.component';
 
 @Component({
   selector: 'app-comparison',
   standalone: true,
-  imports: [ChartModule],
+  imports: [ChartModule, CardComponent],
   templateUrl: './comparison.component.html',
   styleUrls: ['./comparison.component.scss'],
 })
@@ -33,6 +34,10 @@ export class ComparisonComponent implements OnInit {
   comparisonData = signal<ComparisonData>({
     tweetValues: null,
     sentimentBins: null,
+  });
+
+  loading = computed(() => {
+    return !this.comparisonData().tweetValues || !this.comparisonData().sentimentBins;
   });
 
   tweetPie = computed(() => {

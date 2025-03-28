@@ -1,56 +1,42 @@
 @if(comparisonData().tweetValues){
 <div class="h-full flex flex-col gap-3">
   <div class="grid grid-cols-3 gap-3">
-    <div class="card rounded-xl h-[15vh]">
-      <div class="flex flex-row justify-between">
-        <div class="flex flex-col p-7 gap-2">
-          <span class="text-2xl font-bold">Total Tweets</span>
-          <span class="text-5xl font-bold">{{
-            comparisonData().tweetValues?.total_tweets
+    <app-card [loading]="loading()">
+      <span cardTitle>Total Tweets</span>
+      <span cardValue>{{ comparisonData().tweetValues?.total_tweets }}</span>
+      <p-chart type="pie" [data]="tweetPie()" cardInfo />
+    </app-card>
+    <app-card [loading]="loading()">
+      <span cardTitle>Avg Sentiment</span>
+      <span cardValue>{{ comparisonData().tweetValues?.avg_sentiment }}</span>
+      <p-chart type="pie" [data]="sentimentPie()" cardInfo />
+    </app-card>
+    <app-card [loading]="loading()">
+      <span cardTitle>Interaction count</span>
+      <div class="flex gap-5" cardValue>
+        <div>
+          <span class="text-4xl font-bold">{{
+            comparisonData().tweetValues?.all_likes
           }}</span>
+          <i class="pi pi-heart-fill text-4xl red ml-3"></i>
         </div>
-        <div class="max-h-[100px] max-w-[100px] p-4 mt-2 mr-2">
-          <p-chart type="pie" [data]="tweetPie()" />
-        </div>
-      </div>
-    </div>
-    <div class="card rounded-xl h-[15vh]">
-      <div class="flex flex-row justify-between">
-        <div class="flex flex-col p-7 gap-2">
-          <span class="text-2xl font-bold">Avg Sentiment</span>
-          <span class="text-5xl font-bold">{{
-            comparisonData().tweetValues?.avg_sentiment
+        <div>
+          <span class="text-4xl font-bold">{{
+            comparisonData().tweetValues?.all_retweets
           }}</span>
-        </div>
-        <div class="max-h-[100px] max-w-[100px] p-4 mt-2 mr-2">
-          <p-chart type="pie" [data]="sentimentPie()" />
+          <i class="pi pi-undo text-4xl ml-3"></i>
         </div>
       </div>
-    </div>
-    <div class="card rounded-xl h-[15vh] p-7">
-      <div class="flex flex-col gap-2">
-        <div class="flex flex-col gap-2">
-          <span class="text-2xl font-bold">Interaction count</span>
-        </div>
-        <div class="flex justify-between">
-          <div class="flex gap-3">
-            <span class="text-4xl font-bold">{{
-              comparisonData().tweetValues?.all_likes
-            }}</span>
-            <i class="pi pi-heart-fill text-4xl red"></i>
-          </div>
-          <div class="flex gap-3">
-            <span class="text-4xl font-bold">{{
-              comparisonData().tweetValues?.all_retweets
-            }}</span>
-            <i class="pi pi-undo text-4xl"></i>
-          </div>
-        </div>
-      </div>
-    </div>
+    </app-card>
   </div>
   <div class="card rounded-xl p-7 h-full">
+    @if(loading()){
+    <div class="h-full w-full flex items-center justify-center">
+      <i class="pi pi-spin pi-spinner" style="font-size: 5rem"></i>
+    </div>
+    }@else{
     <p-chart type="bar" [data]="sentimentBins()" />
+    }
   </div>
 </div>
 }

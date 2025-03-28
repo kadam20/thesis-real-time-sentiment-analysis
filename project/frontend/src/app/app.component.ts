@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { HeaderComponent } from './components/header/header.component';
-import { SidePanelComponent } from './components/side-panel/side-panel.component';
+import { HeaderComponent } from './components/_layout/header/header.component';
+import { SidePanelComponent } from './components/_layout/side-panel/side-panel.component';
 import { SocketService } from './services/socket.service';
 
 @Component({

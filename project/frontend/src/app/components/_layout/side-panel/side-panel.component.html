@@ -5,8 +5,10 @@
     <span class="font-bold">Live Feed</span>
     <span>{{ currentTime | date : "HH:mm:ss" }}</span>
   </div>
-  <div class="flex flex-col gap-5">
-    @if (tweets().length>0){ @for(tweet of tweets(); track tweet){
+  <div class="flex flex-col gap-5 pb-4">
+    @if(loading()){
+    <p-skeleton height="12rem"/>
+    } @else { @for(tweet of tweets(); track tweet){
     <app-tweet [tweet]="tweet"></app-tweet>
     } }
   </div>

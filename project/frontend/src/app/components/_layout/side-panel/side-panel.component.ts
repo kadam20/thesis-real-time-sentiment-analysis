@@ -1,23 +1,36 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { TweetComponent } from './tweet/tweet.component';
+import { TweetComponent } from '../tweet/tweet.component';
 import { Subscription } from 'rxjs';
-import { SocketService } from '../../services/socket.service';
-import { DataService } from '../../services/data.service';
-import { Tweet } from '../../models/tweet.model';
+import { SocketService } from '../../../services/socket.service';
+import { DataService } from '../../../services/data.service';
+import { Tweet } from '../../../models/tweet.model';
+import { SkeletonModule } from 'primeng/skeleton';
 
 @Component({
   selector: 'app-side-panel',
   standalone: true,
-  imports: [DatePipe, TweetComponent],
+  imports: [DatePipe, TweetComponent, SkeletonModule],
   templateUrl: './side-panel.component.html',
   styleUrl: './side-panel.component.scss',
 })
 export class SidePanelComponent implements OnInit, OnDestroy {
   currentTime = new Date();
-  socketService = inject(SocketService)
+  socketService = inject(SocketService);
   tweets = signal<Tweet[]>([]);
-  dataService = inject(DataService)
+  dataService = inject(DataService);
+
+  loading = computed(() => {
+    return this.tweets().length === 0;
+  });
+
   private tweetsSubscription!: Subscription;
   private intervalId: any;
 
@@ -30,9 +43,11 @@ export class SidePanelComponent implements OnInit, OnDestroy {
       this.currentTime = new Date();
     }, 1000);
 
-    this.tweetsSubscription = this.socketService.tweets$.subscribe((tweet:any) => {
-      this.tweets.set([tweet, ...this.tweets().slice(0, -1)]);
-    });
+    this.tweetsSubscription = this.socketService.tweets$.subscribe(
+      (tweet: Tweet | undefined) => {
+        this.tweets.set([tweet!, ...this.tweets().slice(0, -1)]);
+      }
+    );
   }
 
   ngOnDestroy() {

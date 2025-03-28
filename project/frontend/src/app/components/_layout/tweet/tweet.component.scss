@@ -1,0 +1,14 @@
+:host ::ng-deep   {
+    .biden {
+        background: var(--p-primary-blue);
+        color: white;
+    }
+    .trump {
+        background: var(--p-primary-red);
+        color: white;
+    }
+}
+
+.tweet {
+    background: var(--p-primary-100);
+}

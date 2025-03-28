@@ -1,69 +1,45 @@
 <div class="h-full flex flex-col gap-3">
   <div class="grid grid-cols-3 gap-3">
-    <!-- CARD -->
-    <div
-      class="card rounded-xl h-[15vh] flex flex-row justify-between p-7 gap-2"
-    >
-      <div class="flex flex-col gap-3">
-        <span class="text-2xl font-bold">Trump Sentiment</span>
-        <span class="text-5xl font-bold"
-          >{{ changeTracker().trumpChange }}%</span
-        >
-      </div>
+    <app-card [loading]="loading()">
+      <span cardTitle>Trump Sentiment</span>
+      <span cardValue>{{ changeTracker().trumpChange }}%</span>
       <i
-        [class]="
-          changeTracker().trumpChange < 0
-            ? 'pi pi-angle-double-up up'
-            : 'pi pi-angle-double-down down'
-        "
+        [class]="changeTracker().trumpChange < 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
+        cardInfo
       ></i>
-    </div>
-    <!-- CARD -->
-    <div
-      class="card rounded-xl h-[15vh] flex flex-row justify-between p-7 gap-2"
-    >
-      <div class="flex flex-col gap-3">
-        <span class="text-2xl font-bold">Biden Sentiment</span>
-        <span class="text-5xl font-bold"
-          >{{ changeTracker().bidenChange }}%</span
-        >
-      </div>
+    </app-card>
+    <app-card [loading]="loading()">
+      <span cardTitle>Biden Sentiment</span>
+      <span cardValue>{{ changeTracker().bidenChange }}%</span>
       <i
-        [class]="
-          changeTracker().bidenChange < 0
-            ? 'pi pi-angle-double-up up'
-            : 'pi pi-angle-double-down down'
-        "
+        [class]="changeTracker().bidenChange < 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
+        cardInfo
       ></i>
-    </div>
-    <!-- CARD -->
-    <div
-      class="card rounded-xl h-[15vh] flex flex-row justify-between p-7 gap-2"
-    >
-      <div class="flex flex-col gap-3">
-        <span class="text-2xl font-bold">Overall Sentiment</span>
-        <span class="text-5xl font-bold"
-          >{{ changeTracker().totalChange }}%</span
-        >
-      </div>
+    </app-card>
+    <app-card [loading]="loading()">
+      <span cardTitle>Overall Change</span>
+      <span cardValue>{{ changeTracker().totalChange }}%</span>
       <i
-        [class]="
-          changeTracker()!.totalChange < 0
-            ? 'pi pi-angle-double-up up'
-            : 'pi pi-angle-double-down down'
-        "
+        [class]="changeTracker().totalChange < 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
+        cardInfo
       ></i>
-    </div>
+    </app-card>
   </div>
   <div class="card rounded-xl p-7 h-full">
-    <p-chart
+    @if(loading()){
+      <div class="h-full w-full flex items-center justify-center">
+        <i class="pi pi-spin pi-spinner" style="font-size: 5rem"></i>
+      </div>
+    }@else{
+      <p-chart
       type="line"
       [data]="timelineChart().data!"
       [options]="timelineChart().options!"
       class="h-full w-full"
     />
+    }
   </div>
 </div>

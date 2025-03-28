@@ -10,7 +10,6 @@ import {
   signal,
 } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
-import { isPlatformBrowser } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { firstValueFrom, take } from 'rxjs';
 import { TimelineData } from '../../models/timeline.model';
@@ -18,11 +17,13 @@ import { LayoutService } from '../../services/layout.service';
 import { SocketService } from '../../services/socket.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Tweet } from '../../models/tweet.model';
+import { CardComponent } from '../_layout/card/card.component';
+import { IconEnum } from '../../enums/icon.enum';
 
 @Component({
   selector: 'app-time-tracker',
   standalone: true,
-  imports: [ChartModule],
+  imports: [ChartModule, CardComponent],
   templateUrl: './time-tracker.component.html',
   styleUrl: './time-tracker.component.scss',
 })
@@ -33,6 +34,11 @@ export class TimeTrackerComponent {
   private socketService = inject(SocketService);
   platformId = inject(PLATFORM_ID);
   chartData = signal<TimelineData[]>([]);
+  iconEnum = IconEnum;
+
+  loading = computed(() => {
+    return this.chartData().length === 0;
+  });
 
   timelineChart = computed(() => {
     if (this.chartData().length === 0) return {data: {}, options: {}};
