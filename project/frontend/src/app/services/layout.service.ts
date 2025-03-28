@@ -8,6 +8,19 @@ export class LayoutService {
   isDarkMode = signal<boolean>(false);
   localStorageService = inject(LocalstorageService);
 
+  /**
+   * Collects the color styles from primeng.
+   */
+  get colorStyles() {
+    const documentStyle = getComputedStyle(document.documentElement);
+    return {
+      blue: documentStyle.getPropertyValue('--p-primary-blue'),
+      red: documentStyle.getPropertyValue('--p-primary-red'),
+      orange: documentStyle.getPropertyValue('--p-primary-orange'),
+      green: documentStyle.getPropertyValue('--p-primary-green'),
+    };
+  }
+
   constructor() {
     this.getTheme();
   }

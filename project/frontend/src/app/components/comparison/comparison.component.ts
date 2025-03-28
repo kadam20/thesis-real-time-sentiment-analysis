@@ -14,6 +14,7 @@ import { UtilsService } from '../../services/utils.service';
 import { Tweet } from '../../models/tweet.model';
 import { ComparisonData, SentimentBins } from '../../models/comparison.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LayoutService } from '../../services/layout.service';
 
 @Component({
   selector: 'app-comparison',
@@ -24,19 +25,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class ComparisonComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
-  dataService = inject(DataService);
-  socketService = inject(SocketService);
-  utilsService = inject(UtilsService);
-
-  private get colorStyles() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    return {
-      blue: documentStyle.getPropertyValue('--p-primary-blue'),
-      red: documentStyle.getPropertyValue('--p-primary-red'),
-      orange: documentStyle.getPropertyValue('--p-primary-orange'),
-      green: documentStyle.getPropertyValue('--p-primary-green'),
-    };
-  }
+  private dataService = inject(DataService);
+  private socketService = inject(SocketService);
+  private utilsService = inject(UtilsService);
+  private layoutService = inject(LayoutService);
 
   comparisonData = signal<ComparisonData>({
     tweetValues: null,
@@ -48,7 +40,7 @@ export class ComparisonComponent implements OnInit {
     const values = this.comparisonData().tweetValues;
     return this.createPieData(
       [values!.total_trump, values!.total_biden],
-      [this.colorStyles.red, this.colorStyles.blue]
+      [this.layoutService.colorStyles.red, this.layoutService.colorStyles.blue]
     );
   });
 
@@ -57,7 +49,10 @@ export class ComparisonComponent implements OnInit {
     const values = this.comparisonData().tweetValues;
     return this.createPieData(
       [values!.total_positive, values!.total_negative],
-      [this.colorStyles.orange, this.colorStyles.green]
+      [
+        this.layoutService.colorStyles.orange,
+        this.layoutService.colorStyles.green,
+      ]
     );
   });
 
@@ -91,7 +86,7 @@ export class ComparisonComponent implements OnInit {
    * Handles new tweet data and updates the chart data.
    * @param {Tweet} tweet Data for the new tweet.
    */
-  handleNewTweet(tweet?: Tweet) {
+  private handleNewTweet(tweet?: Tweet) {
     if (!tweet) return;
     this.comparisonData.update((prev) =>
       this.utilsService.handleNewTweet(prev, tweet)
@@ -126,7 +121,9 @@ export class ComparisonComponent implements OnInit {
         {
           data: data,
           backgroundColor: Array.from({ length: 6 }, (_, i) =>
-            i % 2 === 0 ? this.colorStyles.red : this.colorStyles.blue
+            i % 2 === 0
+              ? this.layoutService.colorStyles.red
+              : this.layoutService.colorStyles.blue
           ),
           borderColor: ['#fff'],
           borderWidth: 2,

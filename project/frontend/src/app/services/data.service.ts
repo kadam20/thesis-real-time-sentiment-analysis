@@ -28,8 +28,4 @@ export class DataService {
     getElectionMap(): Observable<any> {
         return this.http.get<any>(`${environment.apiUrl}/election-map`)
     }
-
-    getTest(): Observable<any> {
-        return this.http.get<any>(`${environment.apiUrl}/test`)
-    }
 }

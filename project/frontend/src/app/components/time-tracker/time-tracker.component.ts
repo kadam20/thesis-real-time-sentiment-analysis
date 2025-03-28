@@ -2,6 +2,7 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   OnInit,
@@ -11,7 +12,12 @@ import {
 import { ChartModule } from 'primeng/chart';
 import { isPlatformBrowser } from '@angular/common';
 import { DataService } from '../../services/data.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, take } from 'rxjs';
+import { TimelineData } from '../../models/timeline.model';
+import { LayoutService } from '../../services/layout.service';
+import { SocketService } from '../../services/socket.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Tweet } from '../../models/tweet.model';
 
 @Component({
   selector: 'app-time-tracker',
@@ -21,22 +27,28 @@ import { firstValueFrom } from 'rxjs';
   styleUrl: './time-tracker.component.scss',
 })
 export class TimeTrackerComponent {
-  data: any;
-
-  options: any;
-
+  private readonly _destroyRef = inject(DestroyRef);
+  private dataService = inject(DataService);
+  private layoutService = inject(LayoutService);
+  private socketService = inject(SocketService);
   platformId = inject(PLATFORM_ID);
+  chartData = signal<TimelineData[]>([]);
 
-  chartData = signal<any[]>([]);
-
-  dataService = inject(DataService);
+  timelineChart = computed(() => {
+    if (this.chartData().length === 0) return {data: {}, options: {}};
+    return {
+      data: this.createTimelineChart(this.chartData()),
+      options: this.createTimelineOptions()
+    };
+  });
 
   changeTracker = computed(() => {
-    if (this.chartData().length === 0) return {
+    if (this.chartData().length === 0)
+      return {
         trumpChange: 0,
         bidenChange: 0,
         totalChange: 0,
-    };
+      };
     return {
       trumpChange: this.calculateChange('trump'),
       bidenChange: this.calculateChange('biden'),
@@ -50,12 +62,28 @@ export class TimeTrackerComponent {
     this.chartData.set(
       await firstValueFrom(this.dataService.getTimelineData())
     );
-    this.initChart();
-    console.log('mam', this.chartData());
-    // TODO subscribe to change of the theme and reinit chart
+
+    console.log(this.chartData());
+    
+    // Listening for new tweets
+    this.socketService.tweets$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((tweet) => {
+        this.handleNewTweet(tweet!)
+      });
   }
 
-  calculateChange(candidate: string) {
+  private handleNewTweet(tweet: Tweet){
+    const newChartData = [...this.chartData()];
+    const lastItem = newChartData[newChartData.length - 1];
+    lastItem.biden_avg_sentiment ? lastItem.biden_avg_sentiment = tweet.sentiment_score : 0;
+    lastItem.biden_avg_sentiment = (lastItem.biden_avg_sentiment + tweet.sentiment_score) / 2;
+    lastItem.trump_avg_sentiment = (lastItem.trump_avg_sentiment + tweet.sentiment_score) / 2;
+    this.chartData.set(newChartData);
+    this.cd.detectChanges
+  }
+
+  private calculateChange(candidate: 'trump' | 'biden' | 'total') {
     console.log('candidate:', `${candidate}_avg_sentiment`);
     const first = this.chartData()[0][`${candidate}_avg_sentiment`];
     const last =
@@ -66,62 +94,39 @@ export class TimeTrackerComponent {
     return Math.round((last / first) * 100);
   }
 
-  initChart() {
-    if (isPlatformBrowser(this.platformId)) {
-      const documentStyle = getComputedStyle(document.documentElement);
-      const textColor = documentStyle.getPropertyValue('--p-primary-500');
-      const textColorSecondary =
-        documentStyle.getPropertyValue('--p-primary-500');
-      const surfaceBorder = documentStyle.getPropertyValue(
-        '--p-content-border-color'
-      );
-
-      this.data = {
-        labels: this.chartData().map((item: any) => item.month_name),
+  /**
+   * Fills the chart with the new tweet data.
+   * @param {TimelineData[]} timelineData Data for the new tweet.
+   */
+  private createTimelineChart(timelineData: TimelineData[]) {
+      return  {
+        labels: timelineData.map((item: TimelineData) => item.month_name),
         datasets: [
           {
             label: 'Trump',
-            data: this.chartData().map((item: any) => item.trump_avg_sentiment),
+            data: timelineData.map((item: TimelineData) => item.trump_avg_sentiment),
             fill: false,
-            borderColor: documentStyle.getPropertyValue('--p-primary-red'),
+            borderColor: this.layoutService.colorStyles.red,
             tension: 0.4,
           },
           {
             label: 'Biden',
-            data: this.chartData().map((item: any) => item.biden_avg_sentiment),
+            data: timelineData.map((item: TimelineData) => item.biden_avg_sentiment),
             fill: false,
-            borderColor: documentStyle.getPropertyValue('--p-primary-blue'),
+            borderColor: this.layoutService.colorStyles.blue,
             tension: 0.4,
           },
         ],
       };
+  }
 
-      this.options = {
-        maintainAspectRatio: false,
-        aspectRatio: 0.6,
-        plugins: {
-          legend: {
-            labels: {
-              //   color: documentStyle.getPropertyValue('--p-primary-400')
-            },
-          },
-        },
-        scales: {
-          x: {
-            ticks: {
-              //   color: textColorSecondary
-            },
-          },
-          y: {
-            min: -1, // Set the minimum value to -1
-            max: 1, // Set the maximum value to 1
-            ticks: {
-              // color: textColorSecondary
-            },
-          },
-        },
-      };
-      this.cd.markForCheck();
-    }
+    /**
+   * Returns the options for the timeline chart.
+   */
+  private createTimelineOptions() {
+    return {
+      maintainAspectRatio: false,
+      aspectRatio: 0.55,
+    };
   }
 }

@@ -61,8 +61,8 @@
   <div class="card rounded-xl p-7 h-full">
     <p-chart
       type="line"
-      [data]="data"
-      [options]="options"
+      [data]="timelineChart().data!"
+      [options]="timelineChart().options!"
       class="h-full w-full"
     />
   </div>
