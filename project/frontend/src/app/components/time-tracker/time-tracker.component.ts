@@ -1,17 +1,7 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef,
-  effect,
-  inject,
-  OnInit,
-  PLATFORM_ID,
-  signal,
-} from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
 import { DataService } from '../../services/data.service';
-import { firstValueFrom, take } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { TimelineData } from '../../models/timeline.model';
 import { LayoutService } from '../../services/layout.service';
 import { SocketService } from '../../services/socket.service';
@@ -32,7 +22,6 @@ export class TimeTrackerComponent {
   private dataService = inject(DataService);
   private layoutService = inject(LayoutService);
   private socketService = inject(SocketService);
-  platformId = inject(PLATFORM_ID);
   chartData = signal<TimelineData[]>([]);
   iconEnum = IconEnum;
 
@@ -41,10 +30,10 @@ export class TimeTrackerComponent {
   });
 
   timelineChart = computed(() => {
-    if (this.chartData().length === 0) return {data: {}, options: {}};
+    if (this.chartData().length === 0) return { data: {}, options: {} };
     return {
       data: this.createTimelineChart(this.chartData()),
-      options: this.createTimelineOptions()
+      options: this.createTimelineOptions(),
     };
   });
 
@@ -62,71 +51,82 @@ export class TimeTrackerComponent {
     };
   });
 
-  constructor(private cd: ChangeDetectorRef) {}
-
   async ngOnInit() {
+    // Fetching initial data
     this.chartData.set(
       await firstValueFrom(this.dataService.getTimelineData())
     );
 
-    console.log(this.chartData());
-    
     // Listening for new tweets
     this.socketService.tweets$
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((tweet) => {
-        this.handleNewTweet(tweet!)
+        this.handleNewTweet(tweet!);
       });
   }
 
-  private handleNewTweet(tweet: Tweet){
+  /**
+   * Updates chart values with the new tweet.
+   * @param {Tweet[]} tweet New tweet.
+   */
+  private handleNewTweet(tweet: Tweet) {
     const newChartData = [...this.chartData()];
     const lastItem = newChartData[newChartData.length - 1];
-    lastItem.biden_avg_sentiment ? lastItem.biden_avg_sentiment = tweet.sentiment_score : 0;
-    lastItem.biden_avg_sentiment = (lastItem.biden_avg_sentiment + tweet.sentiment_score) / 2;
-    lastItem.trump_avg_sentiment = (lastItem.trump_avg_sentiment + tweet.sentiment_score) / 2;
+
+    const sentiment = tweet.sentiment_score;
+    lastItem.total_sum_sentiment += sentiment;
+
+    if (tweet.candidate !== 'trump') lastItem.biden_sum_sentiment += sentiment;
+    if (tweet.candidate !== 'biden') lastItem.trump_sum_sentiment += sentiment;
+
     this.chartData.set(newChartData);
-    this.cd.detectChanges
-  }
-
-  private calculateChange(candidate: 'trump' | 'biden' | 'total') {
-    console.log('candidate:', `${candidate}_avg_sentiment`);
-    const first = this.chartData()[0][`${candidate}_avg_sentiment`];
-    const last =
-      this.chartData()[this.chartData().length - 1][
-        `${candidate}_avg_sentiment`
-      ];
-
-    return Math.round((last / first) * 100);
   }
 
   /**
-   * Fills the chart with the new tweet data.
-   * @param {TimelineData[]} timelineData Data for the new tweet.
+   * Calculates the change in sentiment for a candidate.
+   * @param {'trump' | 'biden' | 'total'} candidate Candidate to calculate change for.
    */
-  private createTimelineChart(timelineData: TimelineData[]) {
-      return  {
-        labels: timelineData.map((item: TimelineData) => item.month_name),
-        datasets: [
-          {
-            label: 'Trump',
-            data: timelineData.map((item: TimelineData) => item.trump_avg_sentiment),
-            fill: false,
-            borderColor: this.layoutService.colorStyles.red,
-            tension: 0.4,
-          },
-          {
-            label: 'Biden',
-            data: timelineData.map((item: TimelineData) => item.biden_avg_sentiment),
-            fill: false,
-            borderColor: this.layoutService.colorStyles.blue,
-            tension: 0.4,
-          },
-        ],
-      };
+  private calculateChange(candidate: 'trump' | 'biden' | 'total') {
+    const first = this.chartData()[0][`${candidate}_sum_sentiment`];
+    const last =
+      this.chartData()[this.chartData().length - 1][
+        `${candidate}_sum_sentiment`
+      ];
+
+    return Math.round(last / first - 1);
   }
 
-    /**
+  /**
+   * Fills the chart with the tweet data.
+   * @param {TimelineData[]} timelineData Data for the tweets over time.
+   */
+  private createTimelineChart(timelineData: TimelineData[]) {
+    return {
+      labels: timelineData.map((item: TimelineData) => item.month_name),
+      datasets: [
+        {
+          label: 'Trump',
+          data: timelineData.map(
+            (item: TimelineData) => item.trump_sum_sentiment
+          ),
+          fill: false,
+          borderColor: this.layoutService.colorStyles.red,
+          tension: 0.4,
+        },
+        {
+          label: 'Biden',
+          data: timelineData.map(
+            (item: TimelineData) => item.biden_sum_sentiment
+          ),
+          fill: false,
+          borderColor: this.layoutService.colorStyles.blue,
+          tension: 0.4,
+        },
+      ],
+    };
+  }
+
+  /**
    * Returns the options for the timeline chart.
    */
   private createTimelineOptions() {

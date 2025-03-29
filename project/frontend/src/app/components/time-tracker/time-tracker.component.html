@@ -4,7 +4,7 @@
       <span cardTitle>Trump Sentiment</span>
       <span cardValue>{{ changeTracker().trumpChange }}%</span>
       <i
-        [class]="changeTracker().trumpChange < 0 ? iconEnum.up : iconEnum.down"
+        [class]="changeTracker().trumpChange > 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
         cardInfo
       ></i>
@@ -13,7 +13,7 @@
       <span cardTitle>Biden Sentiment</span>
       <span cardValue>{{ changeTracker().bidenChange }}%</span>
       <i
-        [class]="changeTracker().bidenChange < 0 ? iconEnum.up : iconEnum.down"
+        [class]="changeTracker().bidenChange > 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
         cardInfo
       ></i>
@@ -22,7 +22,7 @@
       <span cardTitle>Overall Change</span>
       <span cardValue>{{ changeTracker().totalChange }}%</span>
       <i
-        [class]="changeTracker().totalChange < 0 ? iconEnum.up : iconEnum.down"
+        [class]="changeTracker().totalChange > 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
         cardInfo
       ></i>
@@ -30,11 +30,11 @@
   </div>
   <div class="card rounded-xl p-7 h-full">
     @if(loading()){
-      <div class="h-full w-full flex items-center justify-center">
-        <i class="pi pi-spin pi-spinner" style="font-size: 5rem"></i>
-      </div>
+    <div class="h-full w-full flex items-center justify-center">
+      <i class="pi pi-spin pi-spinner" style="font-size: 5rem"></i>
+    </div>
     }@else{
-      <p-chart
+    <p-chart
       type="line"
       [data]="timelineChart().data!"
       [options]="timelineChart().options!"

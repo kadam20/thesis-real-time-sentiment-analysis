@@ -119,6 +119,7 @@ export class ComparisonComponent implements OnInit {
 
   /**
    * Creates bin chart data, used for displaying sentiment bins.
+   * @param {SentimentBins} bins The sentiment bins data.
    */
   private createBinData(bins: SentimentBins) {
     const labels = Object.keys(bins);
