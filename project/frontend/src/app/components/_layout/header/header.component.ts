@@ -27,6 +27,7 @@ export class HeaderComponent implements OnInit {
     const currentTab = this.localStorageService.getItem('currentTab');
     if (currentTab) {
       this.currentTab.set(currentTab);
+      this.router.navigate([`/${currentTab}`])
     }
   }
 
@@ -42,6 +43,7 @@ export class HeaderComponent implements OnInit {
    * @param {string} tabName - The name of the tab to navigate to.
    */
   navigateTab(tabName: string) {
+    console.log('tabName', tabName);
     this.currentTab.set(tabName);
     this.router.navigate([`/${tabName}`])
     this.localStorageService.setItem('currentTab', tabName);

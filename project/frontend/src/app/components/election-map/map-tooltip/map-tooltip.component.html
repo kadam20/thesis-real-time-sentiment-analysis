@@ -25,7 +25,9 @@
       >{{ tooltipData().trumpSentiment }}</span
     >
   </div>
-  <span class="text-right">{{ tooltipData().trumpAmount }}</span>
+  <span class="text-right">{{
+    numberPipe.transform(tooltipData().trumpAmount)
+  }}</span>
   <div>
     <i class="pi pi-circle-fill mr-2" style="color: var(--p-primary-blue)"></i>
     <span>Biden</span>
@@ -41,7 +43,9 @@
       >{{ tooltipData().bidenSentiment }}</span
     >
   </div>
-  <span class="text-right">{{ tooltipData().bidenAmount }}</span>
+  <span class="text-right">{{
+    numberPipe.transform(tooltipData().bidenAmount)
+  }}</span>
   <div>
     <i class="pi pi-circle-fill mr-2"></i>
     <span>Overall</span>
@@ -58,6 +62,6 @@
     >
   </div>
   <span class="text-right">{{
-    tooltipData().trumpAmount + tooltipData().bidenAmount
+    numberPipe.transform(tooltipData().trumpAmount + tooltipData().bidenAmount)
   }}</span>
 </div>

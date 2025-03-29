@@ -16,6 +16,7 @@ import { ComparisonData, SentimentBins } from '../../models/comparison.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService } from '../../services/layout.service';
 import { CardComponent } from '../_layout/card/card.component';
+import { FormatNumberPipe } from '../../pipes/format-number.pipe';
 
 @Component({
   selector: 'app-comparison',
@@ -23,6 +24,7 @@ import { CardComponent } from '../_layout/card/card.component';
   imports: [ChartModule, CardComponent],
   templateUrl: './comparison.component.html',
   styleUrls: ['./comparison.component.scss'],
+  providers: [FormatNumberPipe],
 })
 export class ComparisonComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
@@ -30,7 +32,8 @@ export class ComparisonComponent implements OnInit {
   private socketService = inject(SocketService);
   private utilsService = inject(UtilsService);
   private layoutService = inject(LayoutService);
-
+  
+  numberPipe = inject(FormatNumberPipe);
   comparisonData = signal<ComparisonData>({
     tweetValues: null,
     sentimentBins: null,

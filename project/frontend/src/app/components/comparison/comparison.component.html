@@ -3,7 +3,9 @@
   <div class="grid grid-cols-3 gap-3">
     <app-card [loading]="loading()">
       <span cardTitle>Total Tweets</span>
-      <span cardValue>{{ comparisonData().tweetValues?.total_tweets }}</span>
+      <span cardValue>{{
+        numberPipe.transform(comparisonData().tweetValues?.total_tweets)
+      }}</span>
       <p-chart type="pie" [data]="tweetPie()" cardInfo />
     </app-card>
     <app-card [loading]="loading()">
@@ -16,13 +18,13 @@
       <div class="flex gap-5" cardValue>
         <div>
           <span class="text-4xl font-bold">{{
-            comparisonData().tweetValues?.all_likes
+            numberPipe.transform(comparisonData().tweetValues?.all_likes)
           }}</span>
           <i class="pi pi-heart-fill text-4xl red ml-3"></i>
         </div>
         <div>
           <span class="text-4xl font-bold">{{
-            comparisonData().tweetValues?.all_retweets
+            numberPipe.transform(comparisonData().tweetValues?.all_retweets)
           }}</span>
           <i class="pi pi-undo text-4xl ml-3"></i>
         </div>
