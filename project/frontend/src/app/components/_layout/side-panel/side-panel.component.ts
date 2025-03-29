@@ -13,6 +13,7 @@ import { SocketService } from '../../../services/socket.service';
 import { DataService } from '../../../services/data.service';
 import { Tweet } from '../../../models/tweet.model';
 import { SkeletonModule } from 'primeng/skeleton';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-side-panel',
@@ -20,6 +21,23 @@ import { SkeletonModule } from 'primeng/skeleton';
   imports: [DatePipe, TweetComponent, SkeletonModule],
   templateUrl: './side-panel.component.html',
   styleUrl: './side-panel.component.scss',
+  animations: [
+    trigger('listAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate(
+          '200ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
+      transition(':leave', [
+        animate(
+          '200ms ease-in',
+          style({ opacity: 0, transform: 'translateY(-10px)' })
+        ),
+      ]),
+    ]),
+  ],
 })
 export class SidePanelComponent implements OnInit, OnDestroy {
   currentTime = new Date();

@@ -6,6 +6,7 @@
       <i
         [class]="changeTracker().trumpChange > 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
+        [@highlight]="animation() ? 'newTweet' : 'normal'"
         cardInfo
       ></i>
     </app-card>
@@ -15,6 +16,7 @@
       <i
         [class]="changeTracker().bidenChange > 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
+        [@highlight]="animation() ? 'newTweet' : 'normal'"
         cardInfo
       ></i>
     </app-card>
@@ -24,6 +26,7 @@
       <i
         [class]="changeTracker().totalChange > 0 ? iconEnum.up : iconEnum.down"
         class="text-8xl ml-2"
+        [@highlight]="animation() ? 'newTweet' : 'normal'"
         cardInfo
       ></i>
     </app-card>

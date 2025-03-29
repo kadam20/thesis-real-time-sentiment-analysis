@@ -20,13 +20,19 @@
           <span class="text-4xl font-bold">{{
             numberPipe.transform(comparisonData().tweetValues?.all_likes)
           }}</span>
-          <i class="pi pi-heart-fill text-4xl red ml-3"></i>
+          <i
+            class="pi pi-heart-fill text-4xl red ml-3"
+            [@highlight]="animation() ? 'newTweet' : 'normal'"
+          ></i>
         </div>
         <div>
           <span class="text-4xl font-bold">{{
             numberPipe.transform(comparisonData().tweetValues?.all_retweets)
           }}</span>
-          <i class="pi pi-undo text-4xl ml-3"></i>
+          <i
+            class="pi pi-undo text-4xl ml-3"
+            [@highlight]="animation() ? 'newTweet' : 'normal'"
+          ></i>
         </div>
       </div>
     </app-card>

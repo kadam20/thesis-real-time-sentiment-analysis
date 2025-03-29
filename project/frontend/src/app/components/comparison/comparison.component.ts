@@ -17,6 +17,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService } from '../../services/layout.service';
 import { CardComponent } from '../_layout/card/card.component';
 import { FormatNumberPipe } from '../../pipes/format-number.pipe';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 
 @Component({
   selector: 'app-comparison',
@@ -24,6 +31,25 @@ import { FormatNumberPipe } from '../../pipes/format-number.pipe';
   imports: [ChartModule, CardComponent],
   templateUrl: './comparison.component.html',
   styleUrls: ['./comparison.component.scss'],
+  animations: [
+    trigger('highlight', [
+      state(
+        'normal',
+        style({
+          opacity: 1,
+        })
+      ),
+      state(
+        'newTweet',
+        style({
+          opacity: 0.4,
+          transform: 'scaleY(0.8)',
+        })
+      ),
+      transition('normal => newTweet', [animate('0.2s')]),
+      transition('newTweet => normal', [animate('0.2s')]),
+    ]),
+  ],
   providers: [FormatNumberPipe],
 })
 export class ComparisonComponent implements OnInit {
@@ -32,15 +58,18 @@ export class ComparisonComponent implements OnInit {
   private socketService = inject(SocketService);
   private utilsService = inject(UtilsService);
   private layoutService = inject(LayoutService);
-  
+
   numberPipe = inject(FormatNumberPipe);
+  animation = signal<boolean>(true);
   comparisonData = signal<ComparisonData>({
     tweetValues: null,
     sentimentBins: null,
   });
 
   loading = computed(() => {
-    return !this.comparisonData().tweetValues || !this.comparisonData().sentimentBins;
+    return (
+      !this.comparisonData().tweetValues || !this.comparisonData().sentimentBins
+    );
   });
 
   tweetPie = computed(() => {
@@ -88,6 +117,10 @@ export class ComparisonComponent implements OnInit {
       .subscribe((tweet) => {
         this.handleNewTweet(tweet as Tweet);
       });
+
+    setTimeout(() => {
+      this.animation.set(false);
+    }, 200);
   }
 
   /**
@@ -99,6 +132,12 @@ export class ComparisonComponent implements OnInit {
     this.comparisonData.update((prev) =>
       this.utilsService.handleNewTweet(prev, tweet)
     );
+
+    // Animate new tweet effect
+    this.animation.set(true);
+    setTimeout(() => {
+      this.animation.set(false);
+    }, 500);
   }
 
   /**

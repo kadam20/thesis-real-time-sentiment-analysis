@@ -7,9 +7,9 @@
   </div>
   <div class="flex flex-col gap-5 pb-4">
     @if(loading()){
-    <p-skeleton height="12rem"/>
+    <p-skeleton height="12rem" />
     } @else { @for(tweet of tweets(); track tweet){
-    <app-tweet [tweet]="tweet"></app-tweet>
+    <app-tweet [tweet]="tweet" @listAnimation></app-tweet>
     } }
   </div>
 </div>

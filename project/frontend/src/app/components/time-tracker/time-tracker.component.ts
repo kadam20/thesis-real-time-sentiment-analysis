@@ -9,6 +9,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Tweet } from '../../models/tweet.model';
 import { CardComponent } from '../_layout/card/card.component';
 import { IconEnum } from '../../enums/icon.enum';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 
 @Component({
   selector: 'app-time-tracker',
@@ -16,6 +23,25 @@ import { IconEnum } from '../../enums/icon.enum';
   imports: [ChartModule, CardComponent],
   templateUrl: './time-tracker.component.html',
   styleUrl: './time-tracker.component.scss',
+  animations: [
+    trigger('highlight', [
+      state(
+        'normal',
+        style({
+          opacity: 1,
+        })
+      ),
+      state(
+        'newTweet',
+        style({
+          opacity: 0.4,
+          transform: 'scaleY(0.8)',
+        })
+      ),
+      transition('normal => newTweet', [animate('0.2s')]),
+      transition('newTweet => normal', [animate('0.2s')]),
+    ]),
+  ],
 })
 export class TimeTrackerComponent {
   private readonly _destroyRef = inject(DestroyRef);
@@ -23,6 +49,7 @@ export class TimeTrackerComponent {
   private layoutService = inject(LayoutService);
   private socketService = inject(SocketService);
   chartData = signal<TimelineData[]>([]);
+  animation = signal<boolean>(true);
   iconEnum = IconEnum;
 
   loading = computed(() => {
@@ -63,6 +90,10 @@ export class TimeTrackerComponent {
       .subscribe((tweet) => {
         this.handleNewTweet(tweet!);
       });
+
+    setTimeout(() => {
+      this.animation.set(false);
+    }, 200);
   }
 
   /**
@@ -80,6 +111,12 @@ export class TimeTrackerComponent {
     if (tweet.candidate !== 'biden') lastItem.trump_sum_sentiment += sentiment;
 
     this.chartData.set(newChartData);
+
+    // Animate new tweet effect
+    this.animation.set(true);
+    setTimeout(() => {
+      this.animation.set(false);
+    }, 500);
   }
 
   /**
