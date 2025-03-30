@@ -13,7 +13,7 @@ class StateProperty {
   trumpAmount?: number;
   bidenAmount?: number;
   tooltipContent?: string;
-  density: number;
+  code: string;
 }
 
 class StateGeometry {

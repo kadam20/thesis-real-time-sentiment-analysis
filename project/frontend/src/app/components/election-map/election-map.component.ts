@@ -2,9 +2,11 @@ import {
   ApplicationRef,
   Component,
   ComponentRef,
+  DestroyRef,
   OnChanges,
   OnInit,
   SimpleChanges,
+  computed,
   createComponent,
   inject,
   signal,
@@ -19,6 +21,9 @@ import { TooltipOptions } from 'leaflet';
 import { MapTooltipComponent } from './map-tooltip/map-tooltip.component';
 import { DataService } from '../../services/data.service';
 import { firstValueFrom } from 'rxjs';
+import { SocketService } from '../../services/socket.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Tweet } from '../../models/tweet.model';
 
 @Component({
   selector: 'app-election-map',
@@ -32,27 +37,63 @@ import { firstValueFrom } from 'rxjs';
 })
 export class ElectionMapComponent implements OnInit, OnChanges {
   localStorageService = inject(LocalstorageService);
+  socketService = inject(SocketService);
   dataService = inject(DataService);
-  map: L.Map;
-  geojson: any;
+  mapStyle = signal<string>('candidate');
+  loading = signal<boolean>(false)
   statesData: State[] = statesData.features;
+  geojson: any;
+  map: L.Map;
   stateOptions: { label: string; value: string }[] = [
     { label: 'Candidate', value: 'candidate' },
     { label: 'Sentiment', value: 'sentiment' },
   ];
-  mapStyle = signal<string>('candidate');
   private _componentRef: ComponentRef<MapTooltipComponent>;
   private _applicationRef = inject(ApplicationRef);
-
+  private readonly _destroyRef = inject(DestroyRef);
 
   async ngOnInit() {
     await this.mapData();
     this.getMapStyle();
     this.mapInit();
-    this.buildTooltip()    
+    this.buildTooltip();
+
+    // Listening for new tweets
+    this.socketService.tweets$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((tweet) => {
+        this.handleNewTweet(tweet!);
+      });
   }
 
-  buildTooltip(){
+  /**
+   * Handles new tweet data and updates the chart data.
+   * @param {Tweet} tweet Data for the new tweet.
+   */
+  handleNewTweet(tweet: Tweet) {
+    if (!tweet) return;
+
+    const state = this.statesData.find(
+      (state) => state.properties.code === tweet.state_code
+    );
+    if (state) {
+      state.properties.sentiment! += tweet.sentiment_score;
+      if (tweet.candidate !== 'trump') {
+        state.properties.bidenSentiment! += tweet.sentiment_score;
+        state.properties.trumpAmount! += 1;
+      }
+      if (tweet.candidate !== 'biden') {
+        state.properties.trumpSentiment! += tweet.sentiment_score;
+        state.properties.bidenAmount! += 1;
+      }
+      this.configMap();
+    }
+  }
+
+  /**
+   * Feeding data to the tooltip component.
+   */
+  buildTooltip() {
     this.map.on('tooltipopen', (event) => {
       const { tooltip } = event;
       const tooltipContainer = (tooltip as any)._container;
@@ -74,15 +115,19 @@ export class ElectionMapComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.buildTooltip()    
+    this.buildTooltip();
   }
 
-  // Helper function to bind a tooltip to a polygon
+  /**
+   * Helper function to bind a tooltip to a polygon
+   * @param {L.Polygon} polygon Poligon to bind tooltip to.
+   * @param {any} state State data to be displayed in the tooltip.
+   */
   bindTooltipToPolygon(polygon: L.Polygon, state: any) {
     polygon.bindTooltip('', {
       className: 'state-tooltip',
       opacity: 1,
-      data: { state: state }, 
+      data: { state: state },
     } as TooltipOptions);
   }
 
@@ -98,14 +143,19 @@ export class ElectionMapComponent implements OnInit, OnChanges {
    * Populates statesData with sentiment values and generates tooltips.
    */
   async mapData() {
-    const mapData = await firstValueFrom(this.dataService.getElectionMap())
+    const mapData = await firstValueFrom(this.dataService.getElectionMap());
+    console.log(mapData);
     this.statesData.forEach((state: State) => {
-      state.properties.sentiment = Number((Math.random() * 2 - 1).toFixed(1));
-      state.properties.trumpSentiment = Number((Math.random() * 2 - 1).toFixed(1));
-      state.properties.bidenSentiment = Number((Math.random() * 2 - 1).toFixed(1));
-      state.properties.trumpAmount = Number((Math.random() * 100000- 1).toFixed(0));
-      state.properties.bidenAmount = Number((Math.random() * 100000 - 1).toFixed(0));
+      const stateData = mapData.find(
+        (data: any) => data.state_code === state.properties.code
+      );
+      state.properties.sentiment = stateData.total_sentiment;
+      state.properties.trumpSentiment = stateData.trump_sentiment;
+      state.properties.bidenSentiment = stateData.biden_sentiment;
+      state.properties.trumpAmount = stateData.trump_count;
+      state.properties.bidenAmount = stateData.biden_count;
     });
+    this.loading.set(false);
   }
 
   /**

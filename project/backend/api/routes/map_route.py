@@ -19,7 +19,7 @@ async def get_election_map(db: Session = Depends(get_db)):
                 models.Tweets.state_code,
                 func.round(
                     cast(
-                        func.avg(
+                        func.sum(
                            models.Tweets.sentiment_score
                         ),
                         Numeric,
@@ -28,7 +28,7 @@ async def get_election_map(db: Session = Depends(get_db)):
                 ).label("total_avg_sentiment"),
                 func.round(
                     cast(
-                        func.avg(
+                        func.sum(
                             case(
                                 (
                                     models.Tweets.candidate.in_(["biden", "both"]),
@@ -50,7 +50,7 @@ async def get_election_map(db: Session = Depends(get_db)):
                 ).label("biden_count"),
                 func.round(
                     cast(
-                        func.avg(
+                        func.sum(
                             case(
                                 (
                                     models.Tweets.candidate.in_(["trump", "both"]),
@@ -79,10 +79,10 @@ async def get_election_map(db: Session = Depends(get_db)):
         election_map = [
             {
                 "state_code": row[0],
-                "total_avg_sentiment": float(row[1]) if row[1] is not None else None,
-                "biden_avg_sentiment": float(row[2]) if row[2] is not None else None,
+                "total_sentiment": float(row[1]) if row[1] is not None else None,
+                "biden_sentiment": float(row[2]) if row[2] is not None else None,
                 "biden_count": row[3],
-                "trump_avg_sentiment": float(row[4]) if row[4] is not None else None,
+                "trump_sentiment": float(row[4]) if row[4] is not None else None,
                 "trump_count": row[5],
             }
             for row in results
@@ -119,6 +119,22 @@ async def get_election_map(db: Session = Depends(get_db)):
         ]
 
         return JSONResponse(content=json.loads(json.dumps(election_map)))
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@router.get("/states")
+async def get_states(db: Session = Depends(get_db)):
+    try:
+        # Select only state_code and state_name from State
+        results = db.query(models.State.state_code, models.State.state_name).all()
+
+        states = [
+            {"state_code": row.state_code, "state_name": row.state_name}
+            for row in results
+        ]
+
+        return JSONResponse(content=json.loads(json.dumps(states)))
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
