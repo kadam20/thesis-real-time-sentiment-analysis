@@ -16,7 +16,7 @@ import { statesData } from './states-data';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LocalstorageService } from '../../services/localstorage.service';
-import { State } from '../../models/state.model';
+import { State, StateProperty } from '../../models/state.model';
 import { TooltipOptions } from 'leaflet';
 import { MapTooltipComponent } from './map-tooltip/map-tooltip.component';
 import { DataService } from '../../services/data.service';
@@ -24,6 +24,7 @@ import { firstValueFrom } from 'rxjs';
 import { SocketService } from '../../services/socket.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Tweet } from '../../models/tweet.model';
+import { LayoutService } from '../../services/layout.service';
 
 @Component({
   selector: 'app-election-map',
@@ -38,9 +39,10 @@ import { Tweet } from '../../models/tweet.model';
 export class ElectionMapComponent implements OnInit, OnChanges {
   localStorageService = inject(LocalstorageService);
   socketService = inject(SocketService);
+  layoutService = inject(LayoutService);
   dataService = inject(DataService);
   mapStyle = signal<string>('candidate');
-  loading = signal<boolean>(false)
+  loading = signal<boolean>(false);
   statesData: State[] = statesData.features;
   geojson: any;
   map: L.Map;
@@ -97,8 +99,9 @@ export class ElectionMapComponent implements OnInit, OnChanges {
     this.map.on('tooltipopen', (event) => {
       const { tooltip } = event;
       const tooltipContainer = (tooltip as any)._container;
-      const tooltipData = (tooltip.options as TooltipOptions & { data: any })
-        ?.data.state.properties;
+      const tooltipData = (
+        tooltip.options as TooltipOptions & { data: { state: State } }
+      )?.data.state.properties;
       this._componentRef = createComponent(MapTooltipComponent, {
         environmentInjector: this._applicationRef.injector,
         hostElement: tooltipContainer,
@@ -121,9 +124,9 @@ export class ElectionMapComponent implements OnInit, OnChanges {
   /**
    * Helper function to bind a tooltip to a polygon
    * @param {L.Polygon} polygon Poligon to bind tooltip to.
-   * @param {any} state State data to be displayed in the tooltip.
+   * @param {State} state State data to be displayed in the tooltip.
    */
-  bindTooltipToPolygon(polygon: L.Polygon, state: any) {
+  bindTooltipToPolygon(polygon: L.Polygon, state: State) {
     polygon.bindTooltip('', {
       className: 'state-tooltip',
       opacity: 1,
@@ -144,16 +147,15 @@ export class ElectionMapComponent implements OnInit, OnChanges {
    */
   async mapData() {
     const mapData = await firstValueFrom(this.dataService.getElectionMap());
-    console.log(mapData);
     this.statesData.forEach((state: State) => {
       const stateData = mapData.find(
-        (data: any) => data.state_code === state.properties.code
+        (data) => data.state_code === state.properties.code
       );
-      state.properties.sentiment = stateData.total_sentiment;
-      state.properties.trumpSentiment = stateData.trump_sentiment;
-      state.properties.bidenSentiment = stateData.biden_sentiment;
-      state.properties.trumpAmount = stateData.trump_count;
-      state.properties.bidenAmount = stateData.biden_count;
+      state.properties.sentiment = stateData!.total_sentiment;
+      state.properties.trumpSentiment = stateData!.trump_sentiment;
+      state.properties.bidenSentiment = stateData!.biden_sentiment;
+      state.properties.trumpAmount = stateData!.trump_count;
+      state.properties.bidenAmount = stateData!.biden_count;
     });
     this.loading.set(false);
   }
@@ -193,15 +195,14 @@ export class ElectionMapComponent implements OnInit, OnChanges {
    * @returns {[string, string]} Array containing two color values.
    */
   getColor(): [string, string] {
-    const documentStyle = getComputedStyle(document.documentElement);
     const colorOne =
       this.mapStyle() === 'candidate'
-        ? documentStyle.getPropertyValue('--p-primary-blue')
-        : documentStyle.getPropertyValue('--p-primary-green');
+        ? this.layoutService.colorStyles.blue
+        : this.layoutService.colorStyles.green;
     const colorTwo =
       this.mapStyle() === 'candidate'
-        ? documentStyle.getPropertyValue('--p-primary-red')
-        : documentStyle.getPropertyValue('--p-primary-orange');
+        ? this.layoutService.colorStyles.red
+        : this.layoutService.colorStyles.orange;
 
     return [colorOne, colorTwo];
   }

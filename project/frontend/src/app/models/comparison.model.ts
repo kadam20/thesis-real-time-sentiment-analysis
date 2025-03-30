@@ -3,7 +3,7 @@ export class ComparisonData {
     sentimentBins: SentimentBins | null;
 }
 
-class TweetValues {
+export class TweetValues {
     all_likes: number;
     all_retweets: number;
     avg_sentiment: number;

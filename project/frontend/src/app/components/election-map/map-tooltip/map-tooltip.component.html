@@ -1,5 +1,5 @@
 <div class="p-3 pb-0 flex flex-cols justify-between">
-  <span class="text-2xl font-bold">{{ tooltipData().name }}</span>
+  <span class="text-2xl font-bold">{{ tooltipData()!.name }}</span>
   <img
     src="../../../../assets/images/united-states.png"
     class="h-8 w-8"
@@ -18,15 +18,15 @@
     <span
       class="text-center rounded-lg w-[40px]"
       [style]="
-        tooltipData().trumpSentiment > 0
+        tooltipData()!.trumpSentiment! > 0
           ? 'background: var(--p-primary-green)'
           : 'background: var(--p-primary-orange)'
       "
-      >{{ tooltipData().trumpSentiment }}</span
+      >{{ tooltipData()!.trumpSentiment }}</span
     >
   </div>
   <span class="text-right">{{
-    numberPipe.transform(tooltipData().trumpAmount)
+    numberPipe.transform(tooltipData()!.trumpAmount)
   }}</span>
   <div>
     <i class="pi pi-circle-fill mr-2" style="color: var(--p-primary-blue)"></i>
@@ -36,15 +36,15 @@
     <span
       class="text-center rounded-lg w-[40px]"
       [style]="
-        tooltipData().bidenSentiment > 0
+        tooltipData()!.bidenSentiment! > 0
           ? 'background: var(--p-primary-green)'
           : 'background: var(--p-primary-orange)'
       "
-      >{{ tooltipData().bidenSentiment }}</span
+      >{{ tooltipData()!.bidenSentiment }}</span
     >
   </div>
   <span class="text-right">{{
-    numberPipe.transform(tooltipData().bidenAmount)
+    numberPipe.transform(tooltipData()!.bidenAmount)
   }}</span>
   <div>
     <i class="pi pi-circle-fill mr-2"></i>
@@ -54,14 +54,16 @@
     <span
       class="text-center rounded-lg w-[40px]"
       [style]="
-        tooltipData().sentiment > 0
+        tooltipData()!.sentiment! > 0
           ? 'background: var(--p-primary-green)'
           : 'background: var(--p-primary-orange)'
       "
-      >{{ tooltipData().sentiment }}</span
+      >{{ tooltipData()!.sentiment }}</span
     >
   </div>
   <span class="text-right">{{
-    numberPipe.transform(tooltipData().trumpAmount + tooltipData().bidenAmount)
+    numberPipe.transform(
+      tooltipData()!.trumpAmount! + tooltipData()!.bidenAmount!
+    )
   }}</span>
 </div>

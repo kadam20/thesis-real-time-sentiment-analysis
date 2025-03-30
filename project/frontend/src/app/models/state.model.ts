@@ -5,7 +5,7 @@ export class State {
   geometry: StateGeometry;
 }
 
-class StateProperty {
+export class StateProperty {
   name: string;
   sentiment?: number;
   trumpSentiment?: number;
@@ -19,4 +19,13 @@ class StateProperty {
 class StateGeometry {
   type: string;
   coordinates: any;
+}
+
+export class StateData {
+  state_code: string;
+  total_sentiment: number;
+  biden_sentiment: number;
+  biden_count: number;
+  trump_sentiment: number;
+  trump_count: number;
 }

@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
+import { Tweet } from '../models/tweet.model';
+import { TimelineData } from '../models/timeline.model';
+import { SentimentBins, TweetValues } from '../models/comparison.model';
+import { StateData } from '../models/state.model';
 
 @Injectable({
     providedIn: 'root',
@@ -9,27 +13,23 @@ import { Observable } from 'rxjs';
 export class DataService {
     constructor(private http: HttpClient) {}
 
-    getLatestTweets(): Observable<any> {
-        return this.http.get<any>(`${environment.apiUrl}/top-tweets`)
+    getLatestTweets(): Observable<Tweet[]> {
+        return this.http.get<Tweet[]>(`${environment.apiUrl}/top-tweets`)
     }
 
-    getTimelineData(): Observable<any> {
-        return this.http.get<any>(`${environment.apiUrl}/timeline-tracker`)
+    getTimelineData(): Observable<TimelineData[]> {
+        return this.http.get<TimelineData[]>(`${environment.apiUrl}/timeline-tracker`)
     }
 
-    getTotalData(): Observable<any> {
-        return this.http.get<any>(`${environment.apiUrl}/tweet-stats`)
+    getTotalData(): Observable<TweetValues> {
+        return this.http.get<TweetValues>(`${environment.apiUrl}/tweet-stats`)
     }
 
-    getSentimentBins(): Observable<any> {
-        return this.http.get<any>(`${environment.apiUrl}/sentiment-bins`)
+    getSentimentBins(): Observable<SentimentBins> {
+        return this.http.get<SentimentBins>(`${environment.apiUrl}/sentiment-bins`)
     }
 
-    getElectionMap(): Observable<any> {
-        return this.http.get<any>(`${environment.apiUrl}/election-map`)
-    }
-
-    getStates(): Observable<any> {
-        return this.http.get<any>(`${environment.apiUrl}/states`)
+    getElectionMap(): Observable<StateData[]> {
+        return this.http.get<StateData[]>(`${environment.apiUrl}/election-map`)
     }
 }

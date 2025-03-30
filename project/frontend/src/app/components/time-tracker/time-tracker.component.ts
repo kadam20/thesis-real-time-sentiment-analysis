@@ -101,6 +101,7 @@ export class TimeTrackerComponent {
    * @param {Tweet[]} tweet New tweet.
    */
   private handleNewTweet(tweet: Tweet) {
+    if(!tweet) return;
     const newChartData = [...this.chartData()];
     const lastItem = newChartData[newChartData.length - 1];
 

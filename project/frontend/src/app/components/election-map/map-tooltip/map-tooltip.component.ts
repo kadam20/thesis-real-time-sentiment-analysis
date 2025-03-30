@@ -1,5 +1,6 @@
 import { Component, inject, input } from '@angular/core';
 import { FormatNumberPipe } from '../../../pipes/format-number.pipe';
+import { StateProperty } from '../../../models/state.model';
 
 @Component({
   selector: 'app-map-tooltip',
@@ -10,5 +11,5 @@ import { FormatNumberPipe } from '../../../pipes/format-number.pipe';
 })
 export class MapTooltipComponent {
   numberPipe = inject(FormatNumberPipe);
-  tooltipData = input<any>();
+  tooltipData = input<Partial<StateProperty>>();
 }

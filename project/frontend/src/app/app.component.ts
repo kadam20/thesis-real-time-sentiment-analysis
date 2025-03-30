@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { HeaderComponent } from './components/_layout/header/header.component';
@@ -10,15 +10,9 @@ import { SocketService } from './services/socket.service';
   standalone: true,
   imports: [RouterOutlet, ButtonModule, HeaderComponent, SidePanelComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
-export class AppComponent implements OnInit {
-  title = 'frontend';
-  socketService = inject(SocketService)
-
-
-  ngOnInit(): void {
-    console.log('app connect')
-    // this.socketService.connect()
-  }
+export class AppComponent {
+  title = 'Sentiment tracker';
+  socketService = inject(SocketService);
 }
