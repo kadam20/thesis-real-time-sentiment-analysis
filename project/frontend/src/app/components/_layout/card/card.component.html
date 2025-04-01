@@ -1,11 +1,11 @@
-<div class="card rounded-xl h-[15vh]">
+<div class="card rounded-xl h-[15vh] flex items-center justify-between w-full">
   @if(loading()){
       <div class="flex flex-col p-4 gap-2">
         <p-skeleton height="2rem" styleClass="mb-2" />
         <p-skeleton height="5rem" />
       </div>
   }@else{
-    <div class="flex flex-row justify-between">
+    <div class="flex flex-row justify-between w-full">
       <div class="flex flex-col p-7 gap-2">
         <span class="text-2xl font-bold">
           <ng-content select="[cardTitle]" />
