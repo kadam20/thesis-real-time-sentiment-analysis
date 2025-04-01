@@ -23,7 +23,7 @@ class WSClientPool:
             for client in self.clients:
                 try:
                     print("Sending", payload, "to", client)
-                    await client.send_json("Payload: " + payload)
+                    await client.send_json(payload)
                 except Exception as e:
                     print(f"Error sending to {client}: {e}")
                     self.remove_client(client)

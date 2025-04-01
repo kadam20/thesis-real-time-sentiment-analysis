@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Tweet } from '../models/tweet.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SocketService {
   private socket: WebSocket;
@@ -16,17 +16,30 @@ export class SocketService {
     // Event: Connection opened
     this.socket.onopen = () => {
       console.log('WebSocket connection established');
-      this.socket.send(JSON.stringify({ event: 'connect', message: 'Hello Server!' }));
     };
 
     // Event: Receiving messages
     this.socket.onmessage = (event) => {
-      console.log('Message received from server:', event.data);
-      const data = JSON.parse(event.data);
+      try {
+        let data = JSON.parse(event.data);
 
-      // Listen to 'new_data' event
-      if (data.event === 'new_data') {
-        this.tweetsSubject.next(data.payload);
+        if (typeof data === 'string') data = JSON.parse(data);
+
+        const finalTweet: Tweet = {
+          tweet: data.tweet,
+          likes: data.likes,
+          retweet_count: data.retweetCount,
+          user_name: data.userName,
+          user_followers_count: data.userFollower,
+          state: data.state,
+          state_code: data.state_code,
+          candidate: data.candidate,
+          sentiment_label: data.sentimentLabel,
+          sentiment_score: Number(data.sentimentScore.toFixed(2)),
+        };
+        this.tweetsSubject.next(finalTweet);
+      } catch (firstParseError) {
+        console.error('The data that failed to parse:', event.data);
       }
     };
 
