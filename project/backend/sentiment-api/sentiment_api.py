@@ -9,8 +9,8 @@ app = FastAPI()
 sentiment_analyzer = pipeline("sentiment-analysis")
 
 # Define keywords and hashtags for Trump and Biden
-TRUMP_KEYWORDS = ["Trump", "Donald", "#MAGA"]
-BIDEN_KEYWORDS = ["Biden", "Joe", "#BuildBackBetter"]
+TRUMP_KEYWORDS = ["trump", "donald", "maga"]
+BIDEN_KEYWORDS = ["biden", "joe", "buildbackbetter"]
 
 class SentimentRequest(BaseModel):
     text: str

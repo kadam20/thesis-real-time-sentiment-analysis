@@ -25,6 +25,7 @@ import { SocketService } from '../../services/socket.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Tweet } from '../../models/tweet.model';
 import { LayoutService } from '../../services/layout.service';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-election-map',
@@ -34,6 +35,23 @@ import { LayoutService } from '../../services/layout.service';
   styleUrls: [
     '../../../../node_modules/leaflet/dist/leaflet.css',
     './election-map.component.scss',
+  ],
+  animations: [
+    trigger('mapAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(10px)' }),
+        animate(
+          '500ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
+      transition(':leave', [
+        animate(
+          '500ms ease-in',
+          style({ opacity: 0, transform: 'translateY(10px)' })
+        ),
+      ]),
+    ]),
   ],
 })
 export class ElectionMapComponent implements OnInit, OnChanges {
