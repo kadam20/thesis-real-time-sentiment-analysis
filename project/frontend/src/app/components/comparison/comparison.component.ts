@@ -2,6 +2,7 @@ import {
   Component,
   DestroyRef,
   OnInit,
+  ViewChild,
   computed,
   inject,
   signal,
@@ -58,46 +59,27 @@ export class ComparisonComponent implements OnInit {
   private socketService = inject(SocketService);
   private utilsService = inject(UtilsService);
   private layoutService = inject(LayoutService);
-
   numberPipe = inject(FormatNumberPipe);
+  @ViewChild('tweetPieChart') tweetPieChart!: any;
+  @ViewChild('sentimentPieChart') sentimentPieChart!: any;
+  @ViewChild('binChart') binChart!: any;
+
   animation = signal<boolean>(true);
   comparisonData = signal<ComparisonData>({
-    tweetValues: null,
-    sentimentBins: null,
+    all_likes: 0,
+    all_retweets: 0,
+    avg_sentiment: 0,
+    total_tweets: 0,
+    total_biden: 0,
+    total_trump: 0,
+    total_positive: 0,
+    total_negative: 0,
   });
+  tweetPieConfig = signal<any>(null);
+  sentimentPieConfig = signal<any>(null);
+  binChartConfig = signal<any>(null);
 
-  loading = computed(() => {
-    return (
-      !this.comparisonData().tweetValues || !this.comparisonData().sentimentBins
-    );
-  });
-
-  tweetPie = computed(() => {
-    if (!this.comparisonData().tweetValues) return null;
-    const values = this.comparisonData().tweetValues;
-    return this.createPieData(
-      [values!.total_trump, values!.total_biden],
-      [this.layoutService.colorStyles.red, this.layoutService.colorStyles.blue]
-    );
-  });
-
-  sentimentPie = computed(() => {
-    if (!this.comparisonData().tweetValues) return null;
-    const values = this.comparisonData().tweetValues;
-    return this.createPieData(
-      [values!.total_positive, values!.total_negative],
-      [
-        this.layoutService.colorStyles.orange,
-        this.layoutService.colorStyles.green,
-      ]
-    );
-  });
-
-  sentimentBins = computed(() => {
-    if (!this.comparisonData().sentimentBins) return null;
-    const values = this.comparisonData().sentimentBins;
-    return this.createBinData(values!);
-  });
+  loading = computed(() => !this.comparisonData());
 
   async ngOnInit(): Promise<void> {
     // Fetching data
@@ -106,10 +88,9 @@ export class ComparisonComponent implements OnInit {
       firstValueFrom(this.dataService.getTotalData()),
     ]);
 
-    this.comparisonData.set({
-      sentimentBins: bins,
-      tweetValues: values,
-    });
+    this.comparisonData.set(values);
+    this.createPieData(values);
+    this.createBinData(bins);
 
     // Listening for new tweets
     this.socketService.tweets$
@@ -130,8 +111,10 @@ export class ComparisonComponent implements OnInit {
   private handleNewTweet(tweet?: Tweet) {
     if (!tweet) return;
     this.comparisonData.update((prev) =>
-      this.utilsService.handleNewTweet(prev, tweet)
+      this.utilsService.handleNewTweet(prev!, tweet)
     );
+    this.updatePieCharts(tweet!);
+    this.updateBinChart(tweet!);
 
     // Animate new tweet effect
     this.animation.set(true);
@@ -142,18 +125,72 @@ export class ComparisonComponent implements OnInit {
 
   /**
    * Creates pie chart data for displaying tweet or sentiment data.
-   * @param {number[]} data The data array for the chart.
-   * @param {string[]} colors The background color array for the chart.
+   * @param {ComparisonData} values Values for the charts.
    */
-  private createPieData(data: number[], colors: string[]) {
-    return {
+  private createPieData(values: ComparisonData) {
+    this.tweetPieConfig.set({
       datasets: [
         {
-          data,
-          backgroundColor: colors,
+          data: [values.total_trump, values.total_biden],
+          backgroundColor: [
+            this.layoutService.colorStyles.red,
+            this.layoutService.colorStyles.blue,
+          ],
         },
       ],
-    };
+    });
+
+    this.sentimentPieConfig.set({
+      datasets: [
+        {
+          data: [values.total_positive, values.total_negative],
+          backgroundColor: [
+            this.layoutService.colorStyles.orange,
+            this.layoutService.colorStyles.green,
+          ],
+        },
+      ],
+    });
+  }
+
+  updatePieCharts(tweet: Tweet) {
+    // Update the chart data
+    if (tweet.candidate !== 'trump')
+      this.tweetPieChart.data.datasets[0].data[0] += 1;
+    if (tweet.candidate !== 'biden')
+      this.tweetPieChart.data.datasets[0].data[1] += 1;
+    if (tweet.sentiment_score <= 0)
+      this.sentimentPieChart.data.datasets[0].data[0] += 1;
+    if (tweet.sentiment_score > 0)
+      this.sentimentPieChart.data.datasets[0].data[1] += 1;
+
+    this.tweetPieChart.chart.update();
+    this.sentimentPieChart.chart.update();
+  }
+
+  updateBinChart(tweet: Tweet) {
+    // Update the chart data
+    switch (true) {
+      case tweet.sentiment_score <= -0.3:
+        if (tweet.candidate !== 'biden')
+          this.binChart.chart.data.datasets[0].data[0] += 1;
+        if (tweet.candidate !== 'trump')
+          this.binChart.chart.data.datasets[0].data[1] += 1;
+        break;
+      case tweet.sentiment_score <= 0.3 && tweet.sentiment_score > -0.3:
+        if (tweet.candidate !== 'biden')
+          this.binChart.chart.data.datasets[0].data[2] += 1;
+        if (tweet.candidate !== 'trump')
+          this.binChart.chart.data.datasets[0].data[3] += 1;
+        break;
+      case tweet.sentiment_score > 0.3:
+        if (tweet.candidate !== 'biden')
+          this.binChart.chart.data.datasets[0].data[4] += 1;
+        if (tweet.candidate !== 'trump')
+          this.binChart.chart.data.datasets[0].data[5] += 1;
+        break;
+    }
+    this.binChart.chart.update();
   }
 
   /**
@@ -163,7 +200,7 @@ export class ComparisonComponent implements OnInit {
   private createBinData(bins: SentimentBins) {
     const labels = Object.keys(bins);
     const data = Object.values(bins);
-    return {
+    this.binChartConfig.set({
       labels: labels,
       datasets: [
         {
@@ -177,6 +214,6 @@ export class ComparisonComponent implements OnInit {
           borderWidth: 2,
         },
       ],
-    };
+    });
   }
 }

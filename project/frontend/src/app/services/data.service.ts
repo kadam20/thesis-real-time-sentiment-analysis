@@ -4,7 +4,7 @@ import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { Tweet } from '../models/tweet.model';
 import { TimelineData } from '../models/timeline.model';
-import { SentimentBins, TweetValues } from '../models/comparison.model';
+import { ComparisonData, SentimentBins } from '../models/comparison.model';
 import { StateData } from '../models/state.model';
 
 @Injectable({
@@ -21,8 +21,8 @@ export class DataService {
         return this.http.get<TimelineData[]>(`${environment.apiUrl}/timeline-tracker`)
     }
 
-    getTotalData(): Observable<TweetValues> {
-        return this.http.get<TweetValues>(`${environment.apiUrl}/tweet-stats`)
+    getTotalData(): Observable<ComparisonData> {
+        return this.http.get<ComparisonData>(`${environment.apiUrl}/tweet-stats`)
     }
 
     getSentimentBins(): Observable<SentimentBins> {

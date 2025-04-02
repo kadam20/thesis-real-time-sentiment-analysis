@@ -38,9 +38,10 @@
     </div>
     }@else{
     <p-chart
+      #timelineChart
       type="line"
-      [data]="timelineChart().data!"
-      [options]="timelineChart().options!"
+      [data]="timelineChartConfig().data!"
+      [options]="timelineChartConfig().options!"
       class="h-full w-full"
     />
     }

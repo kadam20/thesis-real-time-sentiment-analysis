@@ -1,4 +1,11 @@
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { ChartModule } from 'primeng/chart';
 import { DataService } from '../../services/data.service';
 import { firstValueFrom } from 'rxjs';
@@ -48,6 +55,7 @@ export class TimeTrackerComponent {
   private dataService = inject(DataService);
   private layoutService = inject(LayoutService);
   private socketService = inject(SocketService);
+  @ViewChild('timelineChart') timelineChart!: any;
   chartData = signal<TimelineData[]>([]);
   animation = signal<boolean>(true);
   iconEnum = IconEnum;
@@ -56,12 +64,12 @@ export class TimeTrackerComponent {
     return this.chartData().length === 0;
   });
 
-  timelineChart = computed(() => {
-    if (this.chartData().length === 0) return { data: {}, options: {} };
-    return {
-      data: this.createTimelineChart(this.chartData()),
-      options: this.createTimelineOptions(),
-    };
+  timelineChartConfig = signal<any>({
+    data: null,
+    options: {
+      maintainAspectRatio: false,
+      aspectRatio: 0.55,
+    },
   });
 
   changeTracker = computed(() => {
@@ -84,6 +92,11 @@ export class TimeTrackerComponent {
       await firstValueFrom(this.dataService.getTimelineData())
     );
 
+    this.timelineChartConfig.set({
+      ...this.timelineChartConfig(),
+      data: this.createTimelineChart(this.chartData()),
+    });
+
     // Listening for new tweets
     this.socketService.tweets$
       .pipe(takeUntilDestroyed(this._destroyRef))
@@ -101,7 +114,7 @@ export class TimeTrackerComponent {
    * @param {Tweet[]} tweet New tweet.
    */
   private handleNewTweet(tweet: Tweet) {
-    if(!tweet) return;
+    if (!tweet) return;
     const newChartData = [...this.chartData()];
     const lastItem = newChartData[newChartData.length - 1];
 
@@ -112,6 +125,26 @@ export class TimeTrackerComponent {
     if (tweet.candidate !== 'biden') lastItem.trump_sum_sentiment += sentiment;
 
     this.chartData.set(newChartData);
+
+    // Update the chart
+    if (this.timelineChart && this.timelineChart.chart) {
+      const len = this.chartData().length - 1;
+
+      // Update the chart data with the new tweet sentiment score for Biden.
+      if (tweet.candidate !== 'trump') {
+        this.timelineChart.chart.data.datasets[1].data[len] =
+          Number(this.timelineChart.chart.data.datasets[1].data[len]) + tweet.sentiment_score;
+      }
+
+      // Update the chart data with the new tweet sentiment score for Trump.
+      if (tweet.candidate !== 'biden') {
+        this.timelineChart.chart.data.datasets[0].data[len] =
+          Number(this.timelineChart.chart.data.datasets[0].data[len]) + tweet.sentiment_score;
+      }
+      
+      // Update the chart to reflect the changes.
+      this.timelineChart.chart.update();
+    }
 
     // Animate new tweet effect
     this.animation.set(true);
@@ -161,16 +194,6 @@ export class TimeTrackerComponent {
           tension: 0.4,
         },
       ],
-    };
-  }
-
-  /**
-   * Returns the options for the timeline chart.
-   */
-  private createTimelineOptions() {
-    return {
-      maintainAspectRatio: false,
-      aspectRatio: 0.55,
     };
   }
 }
