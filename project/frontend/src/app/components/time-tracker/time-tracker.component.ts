@@ -23,6 +23,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
+import { UtilsService } from '../../services/utils.service';
 
 @Component({
   selector: 'app-time-tracker',
@@ -53,16 +54,13 @@ import {
 export class TimeTrackerComponent {
   private readonly _destroyRef = inject(DestroyRef);
   private dataService = inject(DataService);
-  private layoutService = inject(LayoutService);
+  private utilService = inject(UtilsService);
+  private colors = inject(LayoutService).colorStyles;
   private socketService = inject(SocketService);
   @ViewChild('timelineChart') timelineChart!: any;
   chartData = signal<TimelineData[]>([]);
   animation = signal<boolean>(true);
   iconEnum = IconEnum;
-
-  loading = computed(() => {
-    return this.chartData().length === 0;
-  });
 
   timelineChartConfig = signal<any>({
     data: null,
@@ -70,6 +68,10 @@ export class TimeTrackerComponent {
       maintainAspectRatio: false,
       aspectRatio: 0.55,
     },
+  });
+
+  loading = computed(() => {
+    return this.chartData().length === 0;
   });
 
   changeTracker = computed(() => {
@@ -92,10 +94,12 @@ export class TimeTrackerComponent {
       await firstValueFrom(this.dataService.getTimelineData())
     );
 
-    this.timelineChartConfig.set({
-      ...this.timelineChartConfig(),
-      data: this.createTimelineChart(this.chartData()),
-    });
+    // Setting up the chart
+    this.timelineChartConfig().data = this.utilService.createTimelineChart(
+      this.chartData(),
+      this.colors.red,
+      this.colors.blue
+    );
 
     // Listening for new tweets
     this.socketService.tweets$
@@ -115,36 +119,14 @@ export class TimeTrackerComponent {
    */
   private handleNewTweet(tweet: Tweet) {
     if (!tweet) return;
-    const newChartData = [...this.chartData()];
-    const lastItem = newChartData[newChartData.length - 1];
 
-    const sentiment = tweet.sentiment_score;
-    lastItem.total_sum_sentiment += sentiment;
-
-    if (tweet.candidate !== 'trump') lastItem.biden_sum_sentiment += sentiment;
-    if (tweet.candidate !== 'biden') lastItem.trump_sum_sentiment += sentiment;
-
-    this.chartData.set(newChartData);
+    // Update the component data
+    this.chartData.set(
+      this.utilService.handleTimeNewTweet(tweet, this.chartData())
+    );
 
     // Update the chart
-    if (this.timelineChart && this.timelineChart.chart) {
-      const len = this.chartData().length - 1;
-
-      // Update the chart data with the new tweet sentiment score for Biden.
-      if (tweet.candidate !== 'trump') {
-        this.timelineChart.chart.data.datasets[1].data[len] =
-          Number(this.timelineChart.chart.data.datasets[1].data[len]) + tweet.sentiment_score;
-      }
-
-      // Update the chart data with the new tweet sentiment score for Trump.
-      if (tweet.candidate !== 'biden') {
-        this.timelineChart.chart.data.datasets[0].data[len] =
-          Number(this.timelineChart.chart.data.datasets[0].data[len]) + tweet.sentiment_score;
-      }
-      
-      // Update the chart to reflect the changes.
-      this.timelineChart.chart.update();
-    }
+    this.utilService.updateTimelineChart(tweet, this.timelineChart);
 
     // Animate new tweet effect
     this.animation.set(true);
@@ -165,35 +147,5 @@ export class TimeTrackerComponent {
       ];
 
     return Math.round(last / first - 1);
-  }
-
-  /**
-   * Fills the chart with the tweet data.
-   * @param {TimelineData[]} timelineData Data for the tweets over time.
-   */
-  private createTimelineChart(timelineData: TimelineData[]) {
-    return {
-      labels: timelineData.map((item: TimelineData) => item.month_name),
-      datasets: [
-        {
-          label: 'Trump',
-          data: timelineData.map(
-            (item: TimelineData) => item.trump_sum_sentiment
-          ),
-          fill: false,
-          borderColor: this.layoutService.colorStyles.red,
-          tension: 0.4,
-        },
-        {
-          label: 'Biden',
-          data: timelineData.map(
-            (item: TimelineData) => item.biden_sum_sentiment
-          ),
-          fill: false,
-          borderColor: this.layoutService.colorStyles.blue,
-          tension: 0.4,
-        },
-      ],
-    };
   }
 }

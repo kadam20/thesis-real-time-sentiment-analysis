@@ -11,26 +11,31 @@
     <app-card [loading]="loading()">
       <span cardTitle>Avg Sentiment</span>
       <span cardValue>{{ comparisonData().avg_sentiment }}</span>
-      <p-chart type="pie" #sentimentPieChart [data]="sentimentPieConfig()" cardInfo />
+      <p-chart
+        type="pie"
+        #sentimentPieChart
+        [data]="sentimentPieConfig()"
+        cardInfo
+      />
     </app-card>
     <app-card [loading]="loading()">
       <span cardTitle>Interaction count</span>
       <div class="flex gap-5" cardValue>
         <div>
-          <span class="text-4xl font-bold">{{
+          <span class="text-3xl font-bold">{{
             numberPipe.transform(comparisonData().all_likes)
           }}</span>
           <i
-            class="pi pi-heart-fill text-4xl red ml-3"
+            class="pi pi-heart-fill text-3xl red ml-3"
             [@highlight]="animation() ? 'newTweet' : 'normal'"
           ></i>
         </div>
         <div>
-          <span class="text-4xl font-bold">{{
+          <span class="text-3xl font-bold">{{
             numberPipe.transform(comparisonData().all_retweets)
           }}</span>
           <i
-            class="pi pi-undo text-4xl ml-3"
+            class="pi pi-undo text-3xl ml-3"
             [@highlight]="animation() ? 'newTweet' : 'normal'"
           ></i>
         </div>

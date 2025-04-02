@@ -3,10 +3,10 @@ export class ComparisonData {
     all_retweets: number;
     avg_sentiment: number;
     total_tweets: number;
-    total_biden: number;
-    total_trump: number;
-    total_positive: number;
-    total_negative: number;
+    total_biden?: number;
+    total_trump?: number;
+    total_positive?: number;
+    total_negative?: number;
 }
 
 export class SentimentBins {
