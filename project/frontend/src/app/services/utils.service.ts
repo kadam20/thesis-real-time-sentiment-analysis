@@ -1,5 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { LocalstorageService } from './localstorage.service';
+import { Injectable } from '@angular/core';
 import { Tweet } from '../models/tweet.model';
 import { ComparisonData, SentimentBins } from '../models/comparison.model';
 import { TimelineData } from '../models/timeline.model';
@@ -38,8 +37,6 @@ export class UtilsService {
       ],
     };
   }
-
-  handleNewTweetTimeline(tweet: Tweet, timelineChart: any) {}
 
   updateTimelineChart(tweet: Tweet, timelineChart: any) {
     if (timelineChart && timelineChart.chart) {
@@ -119,6 +116,7 @@ export class UtilsService {
       labels: labels,
       datasets: [
         {
+          label: 'Sentiment Bins',
           data: data,
           backgroundColor: Array.from({ length: 6 }, (_, i) =>
             i % 2 === 0 ? red : blue

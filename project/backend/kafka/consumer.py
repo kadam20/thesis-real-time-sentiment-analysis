@@ -53,10 +53,10 @@ def process_message(message, config, db):
                city=kafka_data.get("city", ""),
                country=kafka_data.get("country", ""),
                continent=kafka_data.get("continent", ""),
-               candidate=kafka_data.get("candidate", ""),
+               candidate=sentiment_data["sentiment"]["candidate"],
                state=kafka_data.get("state", ""),
                state_code=kafka_data.get("state_code", ""),
-               sentiment_label=sentiment_data["sentiment"]["label"],
+               sentiment_label= sentiment_data["sentiment"]["label"],
                sentiment_score=sentiment_data["sentiment"]["score"],
                created_at= datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     consumer = KafkaConsumer(
         config["KAFKA_TOPIC"],
         bootstrap_servers=config["KAFKA_SERVER"],
-        auto_offset_reset="earliest",
+        auto_offset_reset="latest",
         value_deserializer=lambda v: json.loads(v.decode("utf-8")),
     )
     # Process data from producer

@@ -6,11 +6,11 @@ import uvicorn
 app = FastAPI()
 
 # Initialize the BERT sentiment analysis pipeline
-sentiment_analyzer = pipeline("sentiment-analysis")
+sentiment_analyzer = pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment", return_all_scores=True)
 
 # Define keywords and hashtags for Trump and Biden
-TRUMP_KEYWORDS = ["trump", "donald", "maga"]
-BIDEN_KEYWORDS = ["biden", "joe", "buildbackbetter"]
+TRUMP_KEYWORDS = ["trump", "donald"]
+BIDEN_KEYWORDS = ["biden", "joe"]
 
 class SentimentRequest(BaseModel):
     text: str
@@ -27,6 +27,20 @@ def get_candidate(text: str):
     else:
         return "both"
 
+def get_sentiment(result):
+    # Perform sentiment analysis using BERT
+    scores = {entry["label"]: entry["score"] for entry in result[0]}
+    print('scores:', scores)
+    print('scores["LABEL_2"]:', scores["LABEL_2"])
+    print('scores["LABEL_0"]:', scores["LABEL_0"])
+
+    sentiment_score = (
+        scores["LABEL_2"] -
+        scores["LABEL_0"]
+    )
+    print('sentiment_score: ', sentiment_score)
+    return sentiment_score
+
 @app.get("/")
 def home():
     return {"message": "Sentiment Analysis API is running with BERT!"}
@@ -37,13 +51,18 @@ def analyze_sentiment(request: SentimentRequest):
         text = request.text
         # Perform sentiment analysis using BERT
         sentiment_result = sentiment_analyzer(text)
+        scores = {entry["label"]: entry["score"] for entry in sentiment_result[0]}
+        sentiment_score = (
+               scores["LABEL_2"] -
+               scores["LABEL_0"]
+           )
         # Prepare the response
         return {
             "text": text,
             "sentiment": {
-                "label": sentiment_result[0]["label"],
-                "score": sentiment_result[0]["score"],
+                "score": sentiment_score,
                 "candidate": get_candidate(text),
+                "label": "positive" if sentiment_score > 0 else "negative",
             },
         }
         

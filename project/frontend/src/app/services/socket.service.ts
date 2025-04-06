@@ -37,6 +37,7 @@ export class SocketService {
           sentiment_label: data.sentimentLabel,
           sentiment_score: Number(data.sentimentScore.toFixed(2)),
         };
+        console.log('Tweet received:', finalTweet); 
         this.tweetsSubject.next(finalTweet);
       } catch (firstParseError) {
         console.error('The data that failed to parse:', event.data);

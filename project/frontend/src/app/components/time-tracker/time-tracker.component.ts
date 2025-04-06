@@ -146,6 +146,10 @@ export class TimeTrackerComponent {
         `${candidate}_sum_sentiment`
       ];
 
+    console.log('cchartData', this.chartData());
+    console.log('first', first);
+    console.log('last', last);
+
     return Math.round(last / first - 1);
   }
 }
